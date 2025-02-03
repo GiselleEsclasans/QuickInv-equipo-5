@@ -1,0 +1,6 @@
+Son necesarias las siguientes dependencias para el correcto funcionamiento de la aplicación:
+
+flet
+pandas
+plotly
+openpyxl

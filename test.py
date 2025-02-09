@@ -27,6 +27,9 @@ def calcular_estadisticas(df: pd.DataFrame) -> dict:
 ###############################################################################
 
 DARK_PURPLE = "#4A1976"
+LIGHT_PURPLE = "#9B5AA3"
+PURPLE = "#682471"
+
 df_step_5 = None  # Variable global para almacenar el DataFrame
 analysis_text_5 = ft.Text("Aún no se han cargado datos.")
 
@@ -35,7 +38,7 @@ analysis_text_5 = ft.Text("Aún no se han cargado datos.")
 def crear_appbar(page: ft.Page, current_route: str = "/") -> ft.Container:
     # Determina en dónde se encuentra el usuario para cambiar el color del botón
     def get_color(route: str, target_route: str) -> str:
-        return "#682471" if route == target_route else DARK_PURPLE
+        return PURPLE if route == target_route else DARK_PURPLE
 
     return ft.Container(
         content=ft.Row(
@@ -50,7 +53,7 @@ def crear_appbar(page: ft.Page, current_route: str = "/") -> ft.Container:
                                 bgcolor=get_color(current_route, "/"),  
                                 color=ft.colors.WHITE,
                                 style=ft.ButtonStyle(
-                                    overlay_color=ft.colors.with_opacity(0.5, "#9B5AA3"),
+                                    overlay_color=ft.colors.with_opacity(0.5, LIGHT_PURPLE),
                                 ),
                                 elevation=0,
                             ),
@@ -65,7 +68,7 @@ def crear_appbar(page: ft.Page, current_route: str = "/") -> ft.Container:
                                 bgcolor=get_color(current_route, "/inventory"),  
                                 color=ft.colors.WHITE,
                                 style=ft.ButtonStyle(
-                                    overlay_color=ft.colors.with_opacity(0.5, "#9B5AA3"),
+                                    overlay_color=ft.colors.with_opacity(0.5, LIGHT_PURPLE),
                                 ),
                                 elevation=0,
                             ),
@@ -80,7 +83,7 @@ def crear_appbar(page: ft.Page, current_route: str = "/") -> ft.Container:
                                 bgcolor=get_color(current_route, "/analysis"),
                                 color=ft.colors.WHITE,
                                 style=ft.ButtonStyle(
-                                    overlay_color=ft.colors.with_opacity(0.5, "#9B5AA3"),
+                                    overlay_color=ft.colors.with_opacity(0.5, LIGHT_PURPLE),
                                 ),
                                 elevation=0,
                             ),
@@ -119,24 +122,47 @@ def route_change_step_5(e: ft.RouteChangeEvent):
             ft.View(
                 route="/",
                 bgcolor=ft.colors.WHITE,
-                appbar=crear_appbar(e.page, current_route="/"), 
+                appbar=crear_appbar(e.page, current_route="/"),
                 controls=[
-                    ft.Column(
-                        [
-                            ft.Text("Bienvenido(a). Cargue su archivo y luego vaya al análisis.", size=18),
-                            ft.ElevatedButton(
-                                "Cargar CSV/Excel",
-                                icon=ft.icons.UPLOAD_FILE,
-                                bgcolor=DARK_PURPLE,
-                                color=ft.colors.WHITE,
-                                on_click=lambda _: e.page.file_picker.pick_files(allow_multiple=False)
-                            ),
-                        ],
-                        alignment=ft.MainAxisAlignment.CENTER
+                    ft.Container(
+                        content=ft.Column(
+                            [
+                                ft.Image(
+                                    src="assets/Facturas.png",
+                                    width=500,
+                                    height=400,
+                                    fit=ft.ImageFit.CONTAIN,
+                                ),
+                                ft.Text(
+                                    "¡Bienvenido!",
+                                    size=50,
+                                    style=ft.TextStyle(italic=True),
+                                    color=DARK_PURPLE,
+                                ),
+                                ft.Text(
+                                    "Arrastra un archivo .xlsx o .csv; o presiona \"Cargar Factura\"",
+                                    size=18,
+                                    color=PURPLE,
+                                ),
+                                ft.ElevatedButton(
+                                    "Cargar Factura",
+                                    icon=ft.icons.UPLOAD_FILE,
+                                    bgcolor=DARK_PURPLE,
+                                    color=ft.colors.WHITE,
+                                    on_click=lambda _: e.page.file_picker.pick_files(allow_multiple=False)
+                                ),
+                            ],
+                            alignment=ft.MainAxisAlignment.CENTER, 
+                            horizontal_alignment=ft.CrossAxisAlignment.CENTER, 
+                            spacing=10,  
+                        ),
+                        expand=True,  
+                        alignment=ft.alignment.center,  # Centrar el contenedor en la página
                     )
                 ]
             )
         )
+
 
     elif e.route == "/inventory":
         print("[DEBUG] Pintando vista '/inventory' en Paso 5")
@@ -166,7 +192,6 @@ def route_change_step_5(e: ft.RouteChangeEvent):
                 controls=[
                     ft.Row(
                         controls=[
-                            
                             ft.ElevatedButton(
                                 "Ver Estadísticas",
                                 icon=ft.icons.INSIGHTS,

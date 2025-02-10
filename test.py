@@ -1,6 +1,7 @@
 import flet as ft
 import pandas as pd
 
+
 ###############################################################################
 # Funciones de análisis (inline o importadas de data_analysis.py)
 ###############################################################################
@@ -27,6 +28,7 @@ def calcular_estadisticas(df: pd.DataFrame) -> dict:
 ###############################################################################
 
 DARK_PURPLE = "#4A1976"
+DARK_PURPLE_2 = "#390865"
 LIGHT_PURPLE = "#9B5AA3"
 PURPLE = "#682471"
 
@@ -111,7 +113,6 @@ def crear_appbar(page: ft.Page, current_route: str = "/") -> ft.Container:
         width=page.width,
     )
 
-
 def route_change_step_5(e: ft.RouteChangeEvent):
     print(f"[DEBUG] route_change_step_5 con route={e.route}")
     e.page.views.clear()
@@ -121,7 +122,7 @@ def route_change_step_5(e: ft.RouteChangeEvent):
         e.page.views.append(
             ft.View(
                 route="/",
-                bgcolor=ft.colors.WHITE,
+                bgcolor=ft.Colors.WHITE,
                 appbar=crear_appbar(e.page, current_route="/"),
                 controls=[
                     ft.Container(
@@ -146,9 +147,9 @@ def route_change_step_5(e: ft.RouteChangeEvent):
                                 ),
                                 ft.ElevatedButton(
                                     "Cargar Factura",
-                                    icon=ft.icons.UPLOAD_FILE,
+                                    icon=ft.Icons.UPLOAD_FILE,
                                     bgcolor=DARK_PURPLE,
-                                    color=ft.colors.WHITE,
+                                    color=ft.Colors.WHITE,
                                     on_click=lambda _: e.page.file_picker.pick_files(allow_multiple=False)
                                 ),
                             ],
@@ -157,19 +158,18 @@ def route_change_step_5(e: ft.RouteChangeEvent):
                             spacing=10,  
                         ),
                         expand=True,  
-                        alignment=ft.alignment.center,  # Centrar el contenedor en la página
+                        alignment=ft.alignment.center,  
                     )
                 ]
             )
         )
-
 
     elif e.route == "/inventory":
         print("[DEBUG] Pintando vista '/inventory' en Paso 5")
         e.page.views.append(
             ft.View(
                 route="/inventory",
-                bgcolor=ft.colors.WHITE,
+                bgcolor=ft.Colors.WHITE,
                 appbar=crear_appbar(e.page, current_route="/inventory"),  
                 controls=[
                     ft.Column(
@@ -187,27 +187,122 @@ def route_change_step_5(e: ft.RouteChangeEvent):
         e.page.views.append(
             ft.View(
                 route="/analysis",
-                bgcolor=ft.colors.WHITE,
-                appbar=crear_appbar(e.page, current_route="/analysis"), 
+                bgcolor=ft.Colors.WHITE,
+                appbar=crear_appbar(e.page, current_route="/analysis"),
                 controls=[
                     ft.Row(
                         controls=[
                             ft.ElevatedButton(
                                 "Ver Estadísticas",
-                                icon=ft.icons.INSIGHTS,
+                                icon=ft.Icons.INSIGHTS,
                                 on_click=lambda _: mostrar_analisis_step_5(e.page),
                                 bgcolor=DARK_PURPLE,
-                                color=ft.colors.WHITE
+                                color=ft.Colors.WHITE
                             ),
                         ],
                         alignment=ft.MainAxisAlignment.CENTER
                     ),
-                    ft.Container(
-                        expand=True
+                    ft.Row(
+                        controls=[
+                            ft.Container(
+                                bgcolor=DARK_PURPLE_2,
+                                border_radius=10,
+                                content=ft.Column(
+                                    controls=[
+                                        ft.Container(
+                                            content=ft.ElevatedButton(
+                                                content=ft.Text(
+                                                    "Horarios Críticos",
+                                                    color=ft.Colors.WHITE,
+                                                    size=14,
+                                                    text_align=ft.TextAlign.CENTER,
+                                                    rotate=ft.Rotate(angle=-1.57),  # Rotar -90 grados
+                                                ),
+                                                bgcolor=DARK_PURPLE_2,
+                                                style=ft.ButtonStyle(
+                                                    overlay_color=ft.Colors.with_opacity(0.5, LIGHT_PURPLE),
+                                                ),
+                                                elevation=0,
+                                            ),
+                                            padding=10,
+                                            bgcolor=DARK_PURPLE_2,
+                                          
+                                            
+                                        ),
+                                        ft.Container(
+                                            content=ft.ElevatedButton(
+                                                content=ft.Text(
+                                                    "Desempeño Financiero",
+                                                    color=ft.Colors.WHITE,
+                                                    size=14,
+                                                    text_align=ft.TextAlign.CENTER,
+                                                    rotate=ft.Rotate(angle=-1.57),  # Rotar -90 grados
+                                                ),
+                                                bgcolor=DARK_PURPLE_2,
+                                                style=ft.ButtonStyle(
+                                                    overlay_color=ft.Colors.with_opacity(0.5, LIGHT_PURPLE),
+                                                ),
+                                                elevation=0,
+                                            ),
+                                            padding=10,
+                                            bgcolor=DARK_PURPLE_2,
+                                         
+                                        ),
+                                        ft.Container(
+                                            content=ft.ElevatedButton(
+                                                content=ft.Text(
+                                                    "Ventas/Día",
+                                                    color=ft.Colors.WHITE,
+                                                    size=14,
+                                                    text_align=ft.TextAlign.CENTER,
+                                                    rotate=ft.Rotate(angle=-1.57),  # Rotar -90 grados
+                                                ),
+                                                bgcolor=DARK_PURPLE_2,
+                                                style=ft.ButtonStyle(
+                                                    overlay_color=ft.Colors.with_opacity(0.5, LIGHT_PURPLE),
+                                                ),
+                                                elevation=0,
+                                            ),
+                                            padding=10,
+                                            bgcolor=DARK_PURPLE_2,
+                                      
+                                        ),
+                                        ft.Container(
+                                            content=ft.ElevatedButton(
+                                                content=ft.Text(
+                                                    "Ventas/Hora",
+                                                    color=ft.Colors.WHITE,
+                                                    size=14,
+                                                    text_align=ft.TextAlign.CENTER,
+                                                    rotate=ft.Rotate(angle=-1.57),  # Rotar -90 grados
+                                                ),
+                                                bgcolor=DARK_PURPLE_2,
+                                                style=ft.ButtonStyle(
+                                                    overlay_color=ft.Colors.with_opacity(0.5, LIGHT_PURPLE),
+                                                ),
+                                                elevation=0,
+                                            ),
+                                            padding=10,
+                                            bgcolor=DARK_PURPLE_2,
+                                            
+                                            
+                                        ),
+                                    ],
+                                    alignment=ft.MainAxisAlignment.CENTER,  # Centrar verticalmente
+                                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,  # Centrar horizontalmente
+                                    spacing=30,  
+                                ),
+                                padding=5,
+                                width=100,
+                                
+                            ),
+                        ],
+                        
                     )
                 ]
             )
         )
+
     else:
         print(f"[DEBUG] Ruta desconocida en Paso 5: {e.route}")
         e.page.views.append(
@@ -218,7 +313,6 @@ def route_change_step_5(e: ft.RouteChangeEvent):
         )
 
     e.page.update()
-
 
 def view_pop_step_5(e: ft.ViewPopEvent):
     print("[DEBUG] view_pop_step_5 disparado")

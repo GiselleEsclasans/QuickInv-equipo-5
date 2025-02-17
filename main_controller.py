@@ -1,19 +1,19 @@
 # main_controller.py
 import flet as ft
 import pandas as pd
-from data_model import cargar_datos, calcular_estadisticas
+from data_model import DataModel
+from factura_controller import procesar_facturas  
 from main_view import crear_appbar
 from analysis_view import crear_vista_analisis
 from inventory_view import crear_vista_inventario
 
 DARK_PURPLE = "#4A1976"
-DARK_PURPLE_2 = "#390865"
-LIGHT_PURPLE = "#9B5AA3"
 PURPLE = "#682471"
 
-df_step_5 = None  # Variable global para almacenar el DataFrame
+data_model = DataModel()  # ✅ Instancia del modelo de datos
 
 def route_change_step_5(e: ft.RouteChangeEvent):
+    """Maneja los cambios de vista en la aplicación."""
     print(f"[DEBUG] route_change_step_5 con route={e.route}")
     e.page.views.clear()
 
@@ -84,8 +84,8 @@ def route_change_step_5(e: ft.RouteChangeEvent):
     e.page.update()
 
 def on_file_picked_step_5(files, page: ft.Page):
-    global df_step_5
-    print("[DEBUG] on_file_picked_step_5 con files:", files)
+    """Procesa el archivo seleccionado y lo inserta en MongoDB Atlas."""
+    print("[DEBUG] Archivos seleccionados:", files)
 
     if not files or not files[0].path:
         print("[DEBUG] No se seleccionó archivo o ruta nula.")
@@ -98,25 +98,21 @@ def on_file_picked_step_5(files, page: ft.Page):
         return
 
     file_path = files[0].path
-    print(f"[DEBUG] Cargando archivo desde ruta: {file_path}")
+    print(f"[DEBUG] Procesando archivo: {file_path}")
 
     try:
-        # Cargamos el archivo según su extensión
-        if file_path.endswith(".csv"):
-            df_step_5 = pd.read_csv(file_path)
-        elif file_path.endswith((".xlsx", ".xls")):
-            df_step_5 = pd.read_excel(file_path)
-        else:
-            raise ValueError("El archivo debe ser un CSV o un Excel.")
+        # ✅ Procesar e insertar las facturas en MongoDB Atlas
+        procesar_facturas([file_path])
+        mensaje = f" Archivo '{files[0].name}' procesado correctamente.\nFacturas insertadas en MongoDB Atlas."
 
-        print("[DEBUG] DataFrame cargado OK.")
         page.dialog = ft.AlertDialog(
             title=ft.Text("Éxito"),
-            content=ft.Text(f"Archivo '{files[0].name}' cargado correctamente."),
+            content=ft.Text(mensaje),
         )
         page.dialog.open = True
+
     except Exception as ex:
-        print(f"[DEBUG] Error al cargar archivo: {ex}")
+        print(f"[DEBUG] Error al procesar archivo: {ex}")
         page.dialog = ft.AlertDialog(
             title=ft.Text("Error"),
             content=ft.Text(str(ex))
@@ -125,9 +121,8 @@ def on_file_picked_step_5(files, page: ft.Page):
 
     page.update()
 
-  
-
 def main_step_5(page: ft.Page):
+    """Configura la aplicación y gestiona los eventos principales."""
     print("[DEBUG] Entré a main_step_5")
     page.title = "Paso 5: Dashboard Completo"
     page.padding = 0

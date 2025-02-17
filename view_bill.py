@@ -1,5 +1,5 @@
 import flet as ft
-from factura_controller import procesar_facturas
+from controller_bill import procesar_facturas
 
 def crear_vista_facturas(page: ft.Page):
     """Crea la vista para la carga de facturas."""

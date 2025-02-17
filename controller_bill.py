@@ -1,5 +1,5 @@
 import pandas as pd
-from data_model import DataModel
+from model_data import DataModel
 
 data_model = DataModel()
 

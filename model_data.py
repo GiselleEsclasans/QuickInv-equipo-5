@@ -1,6 +1,7 @@
 # Description: Clase que se encarga de la conexión con MongoDB Atlas y de realizar operaciones CRUD.
 import pymongo
 import pandas as pd
+from datetime import datetime
 
 class DataModel:
     def __init__(self):
@@ -48,7 +49,7 @@ class DataModel:
         return producto  # Retorna `None` si el producto no existe
 
 
-    def descontar_stock(self, id_producto, categoria, cantidad):
+    def descontar_stock(self, id_producto, categoria, cantidad, fecha_factura):
         """✅ Descuenta `cantidad` del stock de `id_producto` en `inventario_col`, si hay suficiente stock."""
         producto = self.obtener_producto(categoria, id_producto)
 
@@ -60,11 +61,26 @@ class DataModel:
                 print(f"   Stock disponible: {stock_disponible}, cantidad requerida: {cantidad}. Faltan {cantidad - stock_disponible} unidades.")
                 return False  # ❌ No se puede procesar la factura con este producto
 
+            
             nueva_cantidad = stock_disponible - cantidad  # Reducimos el stock
+            fecha_actualizacion = fecha_factura.strftime("%Y-%m-%d") if isinstance(fecha_factura, datetime) else str(fecha_factura)
+            
+             # 🔹 Agregar movimiento al historial de ventas
+            movimiento = {
+                "fecha": fecha_actualizacion,
+                "tipo_movimiento": "venta",
+                "cantidad": cantidad
+            }
+
+            
             self.coleccion_inventario.update_one(
                 {"_id": producto["_id"]},
-                {"$set": {"cantidad_disponible": nueva_cantidad}}
+                {
+                    "$set": {"cantidad_disponible": nueva_cantidad, "ultima_actualizacion": fecha_actualizacion},
+                    "$push": {"historico_movimientos": movimiento}
+                }
             )
+
             print(f"Stock actualizado: {producto['nombre_producto']} (ID: {id_producto}) - Nuevo stock: {nueva_cantidad}")
             return True  # ✅ Se procesó correctamente
 

@@ -1,5 +1,5 @@
 import flet as ft
-from main_view import crear_appbar
+from view_main import crear_appbar
 
 DARK_PURPLE = "#4A1976"
 DARK_PURPLE_2 = "#390865"

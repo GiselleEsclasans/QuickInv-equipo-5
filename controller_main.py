@@ -1,11 +1,12 @@
 # main_controller.py
 import flet as ft
 import pandas as pd
-from data_model import DataModel
-from factura_controller import procesar_facturas  
-from main_view import crear_appbar
-from analysis_view import crear_vista_analisis
-from inventory_view import crear_vista_inventario
+from model_data import DataModel
+from controller_bill import procesar_facturas  
+from view_main import crear_appbar
+from view_analysis import crear_vista_analisis
+from view_inventory import crear_vista_inventario
+from view_history import crear_vista_historial
 
 DARK_PURPLE = "#4A1976"
 PURPLE = "#682471"
@@ -67,6 +68,11 @@ def route_change_step_5(e: ft.RouteChangeEvent):
     elif e.route == "/analysis":
         print("[DEBUG] Pintando vista '/analysis' en Paso 5")
         e.page.views.append(crear_vista_analisis(e.page))
+        
+    elif e.route == "/record":
+        print("[DEBUG] Pintando vista '/record' en Paso 5")
+        e.page.views.append(crear_vista_historial(e.page))
+
 
     elif e.route == "/inventory":
         print("[DEBUG] Pintando vista '/inventory' en Paso 5")

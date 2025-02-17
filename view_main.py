@@ -35,8 +35,8 @@ def crear_appbar(page: ft.Page, current_route: str = "/") -> ft.Container:
                         ft.Container(
                             content=ft.ElevatedButton(
                                 "Historial",
-                                on_click=lambda _: page.go("/record"),
-                                bgcolor=get_color(current_route, "/record"),
+                                on_click=lambda _: page.go("/history"),
+                                bgcolor=get_color(current_route, "/history"),
                                 color=ft.colors.WHITE,
                                 style=ft.ButtonStyle(
                                     overlay_color=ft.colors.with_opacity(0.5, LIGHT_PURPLE),
@@ -44,7 +44,7 @@ def crear_appbar(page: ft.Page, current_route: str = "/") -> ft.Container:
                                 elevation=0,
                             ),
                             padding=ft.padding.all(8),
-                            bgcolor=get_color(current_route, "/record"),
+                            bgcolor=get_color(current_route, "/recohistoryrd"),
                             border_radius=ft.border_radius.only(bottom_left=20, bottom_right=20),
                         ),
                         ft.Container(

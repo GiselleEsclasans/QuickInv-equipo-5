@@ -69,8 +69,8 @@ def route_change_step_5(e: ft.RouteChangeEvent):
         print("[DEBUG] Pintando vista '/analysis' en Paso 5")
         e.page.views.append(crear_vista_analisis(e.page))
         
-    elif e.route == "/record":
-        print("[DEBUG] Pintando vista '/record' en Paso 5")
+    elif e.route == "/history":
+        print("[DEBUG] Pintando vista '/history' en Paso 5")
         e.page.views.append(crear_vista_historial(e.page))
 
 

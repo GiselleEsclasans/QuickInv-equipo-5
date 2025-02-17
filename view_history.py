@@ -9,9 +9,9 @@ GRAY = "#D9D9D9"
 
 def crear_vista_historial(page: ft.Page):
     return ft.View(
-        route="/record",
+        route="/history",
         bgcolor=ft.Colors.WHITE,
-        appbar=crear_appbar(page, current_route="/record"),
+        appbar=crear_appbar(page, current_route="/history"),
         controls=[
             ft.Column(
                 

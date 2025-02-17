@@ -1,5 +1,7 @@
 # data_model.py
 import pandas as pd
+import pymongo
+from datetime import datetime
 
 def cargar_datos(filepath: str):
     if not filepath:
@@ -17,10 +19,6 @@ def calcular_estadisticas(df: pd.DataFrame) -> dict:
         "columnas": df.shape[1],
         "columnas_nombres": list(df.columns),
     }
-
-import pandas as pd
-import pymongo
-from datetime import datetime
 
 def procesar_facturas(archivos, db):
     """

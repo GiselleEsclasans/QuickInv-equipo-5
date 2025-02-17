@@ -56,6 +56,7 @@ def procesar_facturas(archivos):
                 id_producto = fila['ID Producto']
                 categoria = fila['Categoría']
                 cantidad_vendida = fila['Cantidad']
+                precio_factura = fila['Precio Unitario']
 
                 # Verificar que el producto existe antes de procesar la factura
                 producto = data_model.obtener_producto(categoria, id_producto)
@@ -69,7 +70,16 @@ def procesar_facturas(archivos):
                     print(f"   Stock disponible: {producto['cantidad_disponible']}, cantidad requerida: {cantidad_vendida}.")
                     print(f"    Factura {numero_factura} no se procesará debido a falta de stock.")
                     continue  # ❌ No procesa la factura si no hay suficiente stock
+                
+                # ✅ Verificar que el precio unitario coincida con el del inventario
+                precio_inventario = producto["precio_unitario"]
+                if precio_factura != precio_inventario:
+                    print(f" Precio incorrecto en Factura {numero_factura} para el producto {producto['nombre_producto']} (ID: {id_producto}).")
+                    print(f"   Precio en inventario: {precio_inventario}, precio en factura: {precio_factura}.")
+                    print(f"    Factura {numero_factura} no se procesará debido a discrepancia de precio.")
+                    continue  # ❌ No procesa la factura si el precio no coincide
 
+                # ✅ Validar la fila antes de procesarla
                 if numero_factura not in facturas_procesadas:
                     facturas_procesadas[numero_factura] = {
                         "numero_factura": numero_factura,
@@ -83,6 +93,7 @@ def procesar_facturas(archivos):
                         "total_factura": 0
                     }
 
+                # ✅ Agregar el producto a la factura        
                 if numero_factura not in facturas_procesadas:
                     facturas_procesadas[numero_factura] = {
                         "numero_factura": numero_factura,

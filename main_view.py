@@ -1,6 +1,6 @@
 # main_view.py
 import flet as ft
-from data_model import cargar_datos, calcular_estadisticas
+from data_model import DataModel
 
 DARK_PURPLE = "#4A1976"
 DARK_PURPLE_2 = "#390865"

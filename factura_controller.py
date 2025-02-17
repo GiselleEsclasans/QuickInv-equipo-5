@@ -62,6 +62,26 @@ def procesar_facturas(archivos):
                 if not producto:
                     print(f"[ERROR] Producto '{id_producto}' no encontrado en inventario. Factura {numero_factura} no se procesará.")
                     continue  # No procesa la factura si el producto no existe
+                
+                # ✅ Verificar que haya stock suficiente
+                if cantidad_vendida > producto["cantidad_disponible"]:
+                    print(f"Stock insuficiente para el producto {producto['nombre_producto']} (ID: {id_producto}).")
+                    print(f"   Stock disponible: {producto['cantidad_disponible']}, cantidad requerida: {cantidad_vendida}.")
+                    print(f"    Factura {numero_factura} no se procesará debido a falta de stock.")
+                    continue  # ❌ No procesa la factura si no hay suficiente stock
+
+                if numero_factura not in facturas_procesadas:
+                    facturas_procesadas[numero_factura] = {
+                        "numero_factura": numero_factura,
+                        "fecha": fila['Fecha'],
+                        "hora": fila['Hora'].strftime("%H:%M") if isinstance(fila['Hora'], pd.Timestamp) else str(fila['Hora']),
+                        "cliente": {
+                            "id_cliente": fila['ID Cliente'],
+                            "nombre": fila['Nombre Cliente']
+                        },
+                        "productos": [],
+                        "total_factura": 0
+                    }
 
                 if numero_factura not in facturas_procesadas:
                     facturas_procesadas[numero_factura] = {

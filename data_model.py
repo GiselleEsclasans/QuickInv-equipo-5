@@ -34,27 +34,43 @@ class DataModel:
 
     def obtener_producto(self, categoria, id_producto):
         """✅ Verifica si el producto existe en `inventario_col`."""
-        producto = self.coleccion_inventario.find_one({"id_producto": id_producto, "categoria": categoria})
+        categoria = categoria.strip().lower()
+        id_producto = id_producto.strip().upper()
+
+        producto = self.coleccion_inventario.find_one({
+            "id_producto": id_producto,
+            "categoria": {"$regex": f"^{categoria}$", "$options": "i"}  # 🔹 Ignorar mayúsculas y espacios
+        })
 
         if not producto:
-            print(f" Producto con ID '{id_producto}' y Categoría '{categoria}' NO encontrado en inventario.")
+            print(f"[ERROR] Producto con ID '{id_producto}' y Categoría '{categoria}' NO encontrado en inventario.")
 
         return producto  # Retorna `None` si el producto no existe
 
 
     def descontar_stock(self, id_producto, categoria, cantidad):
-        """Descuenta `cantidad` del stock de `id_producto` en `inventario_col`."""
-        producto = self.obtener_producto(categoria, id_producto)  # Se usa la categoría real
+        """✅ Descuenta `cantidad` del stock de `id_producto` en `inventario_col`, si hay suficiente stock."""
+        producto = self.obtener_producto(categoria, id_producto)
 
         if producto:
-            nueva_cantidad = max(producto["cantidad_disponible"] - cantidad, 0)  # Evita valores negativos
+            stock_disponible = producto["cantidad_disponible"]
+
+            if cantidad > stock_disponible:
+                print(f"Cuidado: Stock insuficiente para el producto {producto['nombre_producto']} (ID: {id_producto}).")
+                print(f"   Stock disponible: {stock_disponible}, cantidad requerida: {cantidad}. Faltan {cantidad - stock_disponible} unidades.")
+                return False  # ❌ No se puede procesar la factura con este producto
+
+            nueva_cantidad = stock_disponible - cantidad  # Reducimos el stock
             self.coleccion_inventario.update_one(
                 {"_id": producto["_id"]},
                 {"$set": {"cantidad_disponible": nueva_cantidad}}
             )
             print(f"Stock actualizado: {producto['nombre_producto']} (ID: {id_producto}) - Nuevo stock: {nueva_cantidad}")
+            return True  # ✅ Se procesó correctamente
+
         else:
-            print(f" No se pudo descontar stock: Producto {id_producto} no encontrado.")
+            print(f"No se pudo descontar stock: Producto {id_producto} no encontrado.")
+            return False  # ❌ No se encontró el producto
 
 
     def actualizar_stock(self, producto, cantidad, fecha):

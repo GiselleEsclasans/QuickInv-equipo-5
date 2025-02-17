@@ -57,6 +57,7 @@ def procesar_facturas(archivos):
                 categoria = fila['Categoría']
                 cantidad_vendida = fila['Cantidad']
                 precio_factura = fila['Precio Unitario']
+                fecha_factura = fila['Fecha']
 
                 # Verificar que el producto existe antes de procesar la factura
                 producto = data_model.obtener_producto(categoria, id_producto)
@@ -83,21 +84,7 @@ def procesar_facturas(archivos):
                 if numero_factura not in facturas_procesadas:
                     facturas_procesadas[numero_factura] = {
                         "numero_factura": numero_factura,
-                        "fecha": fila['Fecha'],
-                        "hora": fila['Hora'].strftime("%H:%M") if isinstance(fila['Hora'], pd.Timestamp) else str(fila['Hora']),
-                        "cliente": {
-                            "id_cliente": fila['ID Cliente'],
-                            "nombre": fila['Nombre Cliente']
-                        },
-                        "productos": [],
-                        "total_factura": 0
-                    }
-
-                # ✅ Agregar el producto a la factura        
-                if numero_factura not in facturas_procesadas:
-                    facturas_procesadas[numero_factura] = {
-                        "numero_factura": numero_factura,
-                        "fecha": fila['Fecha'],
+                        "fecha": fecha_factura,
                         "hora": fila['Hora'].strftime("%H:%M") if isinstance(fila['Hora'], pd.Timestamp) else str(fila['Hora']),
                         "cliente": {
                             "id_cliente": fila['ID Cliente'],
@@ -133,6 +120,6 @@ def procesar_facturas(archivos):
         # 🔹 Después de insertar las facturas, descontar stock en `inventario_col`
         for factura in facturas_procesadas.values():
             for producto in factura["productos"]:
-                data_model.descontar_stock(producto["id_producto"],producto["categoria"], producto["cantidad"])
+                data_model.descontar_stock(producto["id_producto"],producto["categoria"], producto["cantidad"], factura["fecha"])
 
         print(f"\n {len(facturas_procesadas)} facturas insertadas correctamente en MongoDB Atlas.")

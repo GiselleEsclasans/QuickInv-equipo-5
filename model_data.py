@@ -14,6 +14,21 @@ class DataModel:
         self.db_facturas = self.client["Facturas"] 
         self.coleccion_facturas = self.db_facturas["facturas_col"]
 
+    
+    def obtener_facturas_por_fecha(self):
+        """✅ Obtiene todas las fechas únicas en las que se han cargado facturas."""
+        fechas = self.coleccion_facturas.distinct("fecha")
+        return sorted(fechas, reverse=True)  # 🔹 Ordenadas por fecha descendente
+
+    def obtener_facturas_por_dia(self, fecha):
+        """✅ Obtiene todas las facturas de un día específico."""
+        return list(self.coleccion_facturas.find({"fecha": fecha}))
+
+    def obtener_detalle_factura(self, numero_factura):
+        """✅ Obtiene el detalle completo de una factura por su número."""
+        return self.coleccion_facturas.find_one({"numero_factura": numero_factura})
+
+
     def cargar_datos(self, filepath: str):
         """Carga datos desde un archivo CSV o Excel y los almacena en un DataFrame."""
         if not filepath:

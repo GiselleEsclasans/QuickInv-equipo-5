@@ -37,7 +37,7 @@ def route_change_step_5(e: ft.RouteChangeEvent):
         if e.route in rutas:
             print(f"[DEBUG] Cargando vista: {e.route}")
             nueva_vista = rutas[e.route](e.page) # ✅ Cargar la vista correspondiente
-            e.page.views.clear
+            e.page.views.clear()
             e.page.views.append(nueva_vista)
             e.page.update()
         else:

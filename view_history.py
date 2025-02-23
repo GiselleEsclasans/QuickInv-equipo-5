@@ -1,7 +1,6 @@
 import flet as ft
 from view_main import crear_appbar
 from model_data import DataModel
-
 from datetime import datetime
 
 
@@ -125,17 +124,17 @@ def cerrar_dialogo(dialogo, page):
 
 
 def crear_vista_historial(page: ft.Page):
-    """✅ Vista del historial de facturas optimizada para aprovechar el espacio vertical sin espacios vacíos."""
+    """✅ Vista del historial de facturas cargadas, optimizada para mostrar más facturas y reducir espacios en blanco."""
 
     lista_fechas = ft.Dropdown(
         options=[],
         value=None,
-        on_change=lambda e: cargar_facturas_por_dia(e.control.value, lista_facturas, page),
+        on_change=lambda e: cargar_facturas_por_dia(e.control.value, lista_facturas, page)
     )
 
     lista_facturas = ft.ListView(
-        expand=True,  # 🔹 Hace que la lista de facturas ocupe todo el espacio disponible
-        spacing=5,  # 🔹 Reduce el espacio entre facturas para que entren más
+        expand=True, 
+        spacing=5,  # 🔹 Reducimos el espacio entre facturas
         auto_scroll=True  
     )
 
@@ -146,38 +145,23 @@ def crear_vista_historial(page: ft.Page):
         controls=[
             ft.Column(
                 [
-                    # Selección de fecha
-                    ft.Container(
-                        content=ft.Text("📅 Selecciona una fecha para ver las facturas:", size=16, color=PURPLE),
-                        alignment=ft.alignment.top_center,
-                        padding=ft.padding.only(top=10)
-                    ),
+                    ft.Text("📅 Selecciona una fecha para ver las facturas:", size=16, color=PURPLE),
                     lista_fechas,
-
-                    # Facturas del día (justo debajo del dropdown)
-                    ft.Container(
-                        content=ft.Text("📜 Facturas del día:", size=16, weight=ft.FontWeight.BOLD, color=DARK_PURPLE),
-                        alignment=ft.alignment.top_left,
-                        padding=ft.padding.only(top=10, left=10)
-                    ),
-
-                    # Lista de facturas con altura optimizada
+                    ft.Divider(color=GRAY),
+                    ft.Text("📜 Facturas del día:", size=16, weight=ft.FontWeight.BOLD, color=DARK_PURPLE),
                     ft.Container(
                         content=lista_facturas,
-                        expand=True,  # 🔹 Se expande para ocupar todo el espacio disponible
-                        padding=ft.padding.symmetric(horizontal=10),
+                        expand=True,
+                        height=400,  # 🔹 Ajustamos la altura para mostrar más facturas
                     ),
-
-                    # Botón de volver bien posicionado
                     ft.Container(
                         content=ft.ElevatedButton("⬅ Volver", on_click=lambda _: page.go("/")),
-                        alignment=ft.alignment.bottom_center,
                         padding=ft.padding.only(top=10, bottom=10),
                     ),
                 ],
-                alignment=ft.MainAxisAlignment.START,  # 🔹 Mantiene los elementos pegados arriba
+                alignment=ft.MainAxisAlignment.START,  # 🔹 Subimos todo más arriba
                 horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                spacing=10,  # 🔹 Reduce espacio extra entre elementos
+                spacing=10,  # 🔹 Reducimos el espacio vertical
                 expand=True,
             )
         ]
@@ -186,6 +170,6 @@ def crear_vista_historial(page: ft.Page):
     page.views.append(vista)
     page.update()
     
-    cargar_fechas(lista_fechas, lista_facturas, page)  # ✅ Se ejecuta correctamente sin `run_task`
+    cargar_fechas(lista_fechas, lista_facturas, page)  
 
     return vista

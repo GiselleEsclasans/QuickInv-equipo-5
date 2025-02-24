@@ -11,15 +11,17 @@ data_model = DataModel()
 
 def crear_vista_inventario(page: ft.Page) -> ft.View:
     """
-    Vista Inventario con scroll en un Column:
+    Vista Inventario con:
     - Barra de búsqueda
-    - Paneles de expansión por categoría
+    - Paneles de expansión por categoría (scroll con Column)
+    - Campo resumen: "Se encontraron X productos..."
     - Cada producto con Ajuste y "Guardar cambios"
     - Botón "Recargar Inventario"
-    - Se evita Container(scroll=...) y se usa Column(scroll=...).
     """
 
-    # 1. TextField para el buscador
+    # Texto que resume cuántos productos se muestran
+    summary_label = ft.Text("", size=14, color=PURPLE)
+
     buscador_textfield = ft.TextField(
         hint_text="Buscar producto...",
         expand=True,
@@ -27,8 +29,15 @@ def crear_vista_inventario(page: ft.Page) -> ft.View:
         color=DARK_PURPLE,
     )
 
-    # 2. ExpansionPanelList (sin scroll; lo haremos con un Column)
     paneles_categorias = ft.ExpansionPanelList(expand=True)
+
+    # Envolvemos en un Column con scroll
+    scroll_column = ft.Column(
+        controls=[summary_label, paneles_categorias],
+        expand=True,
+        scroll=ft.ScrollMode.AUTO,
+        spacing=5
+    )
 
     def construir_fila_producto(prod):
         cantidad_label = ft.Text(str(prod["cantidad_disponible"]), size=14, color=DARK_PURPLE)
@@ -58,7 +67,7 @@ def crear_vista_inventario(page: ft.Page) -> ft.View:
 
         btn_guardar = ft.ElevatedButton("Guardar cambios", icon=ft.icons.SAVE, on_click=guardar_cambios)
 
-        fila = ft.Row(
+        return ft.Row(
             controls=[
                 ft.Text(prod["nombre_producto"], size=14),
                 ft.Text("Cant:", size=12),
@@ -69,16 +78,17 @@ def crear_vista_inventario(page: ft.Page) -> ft.View:
             ],
             spacing=5
         )
-        return fila
 
     def construir_paneles(filtrar_texto=None):
         expansions = []
+        total_productos = 0  # Para contar cuántos productos se muestran en total
+
         cats = data_model.get_categorias()
         for cat in cats:
             col_productos = ft.Column(spacing=5)
             prods = data_model.get_inventario_de_categoria(cat)
 
-            # Filtramos si hay texto
+            # Filtrar si es necesario
             if filtrar_texto:
                 txt_lower = filtrar_texto.lower()
                 prods = [p for p in prods if txt_lower in p["nombre_producto"].lower()]
@@ -87,6 +97,7 @@ def crear_vista_inventario(page: ft.Page) -> ft.View:
                 continue
 
             for p in prods:
+                total_productos += 1
                 fila_prod = construir_fila_producto(p)
                 col_productos.controls.append(fila_prod)
 
@@ -97,26 +108,36 @@ def crear_vista_inventario(page: ft.Page) -> ft.View:
                     expanded=False
                 )
             )
-        return expansions
 
-    # Asignamos expansions sin filtrar
-    paneles_categorias.controls = construir_paneles()
+        return expansions, total_productos
+
+    def actualizar_vista(filtro=None):
+        """
+        Construye los paneles con o sin filtro,
+        asigna expansions al paneles_categorias,
+        actualiza el summary_label con la cuenta de productos.
+        """
+        expansions, total = construir_paneles(filtro)
+        paneles_categorias.controls = expansions
+        summary_label.value = f"Se encontraron {total} productos."
+        page.update()  # refrescar la vista entera
+
+    # Llamamos la primera vez sin filtro
+    actualizar_vista()
 
     def buscar_producto(e):
         texto_busqueda = buscador_textfield.value.strip()
-        expansions_filtrados = construir_paneles(texto_busqueda)
-        paneles_categorias.controls = expansions_filtrados
-        page.update()
+        actualizar_vista(filtro=texto_busqueda)
 
     def recargar_inventario(e):
-        paneles_categorias.controls = construir_paneles()
-        page.update()
+        buscador_textfield.value = ""  # limpamos el buscador si quieres
+        actualizar_vista()
         print("[DEBUG] Inventario recargado manualmente.")
 
     btn_buscar = ft.IconButton(icon=ft.icons.SEARCH, on_click=buscar_producto)
     btn_recargar = ft.ElevatedButton("Recargar Inventario", icon=ft.icons.REFRESH, on_click=recargar_inventario)
 
-    # 3. Armamos la fila del buscador
+    # Barra de búsqueda
     buscador_row = ft.Container(
         width=500,
         border_radius=40,
@@ -135,27 +156,17 @@ def crear_vista_inventario(page: ft.Page) -> ft.View:
         spacing=20
     )
 
-    # 4. Envolvemos paneles_categorias en un Column con scroll
-    #    para permitir desplazamiento vertical y no truncar nada
-    scroll_column = ft.Column(
-        controls=[paneles_categorias],
-        expand=True,
-        scroll=ft.ScrollMode.AUTO,
-        spacing=5
-    )
-
-    # 5. Construimos la columna principal
+    # Columna principal
     columna_principal = ft.Column(
         controls=[
             barra_busqueda,
             btn_recargar,
-            scroll_column
+            scroll_column  # con summary_label y paneles_categorias
         ],
         spacing=20,
         expand=True
     )
 
-    # 6. Vista final
     vista_inventario = ft.View(
         route="/inventory",
         bgcolor=ft.Colors.WHITE,

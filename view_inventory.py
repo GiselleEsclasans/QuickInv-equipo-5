@@ -1,5 +1,6 @@
 # view_inventory.py
 import flet as ft
+from model_data import DataModel
 from view_main import crear_appbar
 from model_data import DataModel
 

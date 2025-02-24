@@ -115,3 +115,19 @@ class DataModel:
     def insertar_facturas(self, facturas):
         """Inserta facturas en la base de datos `Facturas.facturas_col`."""
         self.coleccion_facturas.insert_many(facturas)
+
+    def aumentar_stock(self, id_producto, cantidad):
+        self.coleccion_inventario.update_one(
+            {"id_producto": id_producto},
+            {"$inc": {"cantidad_disponible": cantidad}, "$set": {"ultima_actualizacion": datetime.now().strftime("%Y-%m-%d")}}
+        )
+    
+    def disminuir_stock(self, id_producto, cantidad):
+        producto = self.coleccion_inventario.find_one({"id_producto": id_producto})
+        if producto and cantidad <= producto["cantidad_disponible"]:
+            self.coleccion_inventario.update_one(
+                {"id_producto": id_producto},
+                {"$inc": {"cantidad_disponible": -cantidad}, "$set": {"ultima_actualizacion": datetime.now().strftime("%Y-%m-%d")}}
+            )
+            return True
+        return False

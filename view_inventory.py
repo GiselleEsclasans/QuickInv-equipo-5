@@ -21,16 +21,25 @@ def crear_vista_inventario(page: ft.Page) -> ft.View:
     """
 
     # Texto que resume cuántos productos se muestran
-    summary_label = ft.Text("", size=14, color=PURPLE)
+    summary_label = ft.Text("", size=16, color=PURPLE, weight=400)
 
     buscador_textfield = ft.TextField(
         hint_text="Buscar producto...",
+        hint_style=ft.TextStyle(
+            size=15,
+            color="#534D54"
+        ),
         expand=True,
         border=ft.InputBorder.NONE,
         color=DARK_PURPLE,
     )
 
-    paneles_categorias = ft.ExpansionPanelList(expand=True)
+    paneles_categorias = ft.ExpansionPanelList(
+        expand=True,
+        expand_icon_color="#692470",
+        expanded_header_padding=ft.padding.symmetric(horizontal=16),
+        divider_color="#692470"
+    )
 
     # Envolvemos en un Column con scroll
     scroll_column = ft.Column(
@@ -41,8 +50,18 @@ def crear_vista_inventario(page: ft.Page) -> ft.View:
     )
 
     def construir_fila_producto(prod):
-        cantidad_label = ft.Text(str(prod["cantidad_disponible"]), size=14, color=DARK_PURPLE)
-        ajuste_input = ft.TextField(width=50, hint_text="+5 / -2 / 3", color=DARK_PURPLE)
+        cantidad_label = ft.Text("Cant: " + str(prod["cantidad_disponible"]), size=18, weight=600, color="#682471")
+        ajuste_input = ft.TextField(
+            width=300,
+            hint_text="Ajuste: +5 / -2 / 3",
+            hint_style=ft.TextStyle(
+                size=15,
+                color="#534D54"
+            ),
+            color="#682471",
+            bgcolor="#CEBECE",
+            border_color="#00000000"
+        )
 
         def guardar_cambios(e):
             ajuste_str = ajuste_input.value.strip()
@@ -66,18 +85,28 @@ def crear_vista_inventario(page: ft.Page) -> ft.View:
             except ValueError:
                 print("[ERROR] Ajuste no es un número válido.")
 
-        btn_guardar = ft.ElevatedButton("Guardar cambios", icon=ft.icons.SAVE, on_click=guardar_cambios)
+        btn_guardar = ft.ElevatedButton(
+            "Guardar cambios",
+            icon=ft.icons.SAVE,
+            icon_color="#FFFFFF",
+            color="#FFFFFF",
+            on_click=guardar_cambios,
+            bgcolor={"": "#8835D0", "hovered": "#B06EEB"})
 
         return ft.Row(
             controls=[
-                ft.Text(prod["nombre_producto"], size=14),
-                ft.Text("Cant:", size=12),
+                ft.Text(
+                    prod["nombre_producto"],
+                    size=18,
+                    weight=700,
+                    color="#682471"
+                ),
                 cantidad_label,
-                ft.Text("Ajuste:", size=12),
                 ajuste_input,
                 btn_guardar
             ],
-            spacing=5
+            spacing=9,
+            alignment=ft.MainAxisAlignment.SPACE_AROUND
         )
 
     def construir_paneles(filtrar_texto=None):
@@ -104,8 +133,17 @@ def crear_vista_inventario(page: ft.Page) -> ft.View:
 
             expansions.append(
                 ft.ExpansionPanel(
-                    header=ft.Text(cat, size=16, weight=ft.FontWeight.BOLD, color=PURPLE),
+                    header=ft.Container(
+                        content=ft.Text(
+                            cat,
+                            size=16,
+                            weight=ft.FontWeight.BOLD,
+                            color=PURPLE
+                        ),
+                        padding=ft.padding.all(16)
+                    ),
                     content=col_productos,
+                    bgcolor="#EEE6F0",
                     expanded=False
                 )
             )
@@ -135,8 +173,22 @@ def crear_vista_inventario(page: ft.Page) -> ft.View:
         actualizar_vista()
         print("[DEBUG] Inventario recargado manualmente.")
 
-    btn_buscar = ft.IconButton(icon=ft.icons.SEARCH, on_click=buscar_producto)
-    btn_recargar = ft.ElevatedButton("Recargar Inventario", icon=ft.icons.REFRESH, on_click=recargar_inventario)
+    btn_buscar = ft.IconButton(
+        icon=ft.icons.SEARCH,
+        on_click=buscar_producto,
+        icon_color="#8934D0"
+    )
+    btn_recargar = ft.ElevatedButton(
+        "Recargar Inventario",
+        icon=ft.icons.REFRESH,
+        icon_color="#FFFFFF",
+        on_click=recargar_inventario,
+        style=ft.ButtonStyle(
+            color={"": "#FFFFFF"},
+            bgcolor={"": "#8835D0", "hovered": "#B06EEB"},
+            padding=12
+        )
+    )
 
     # Barra de búsqueda
     buscador_row = ft.Container(

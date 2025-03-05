@@ -122,11 +122,27 @@ def on_file_picked_step_5(files, page: ft.Page):
 
     if not files or not files[0].path:
         print("[DEBUG] No se seleccionó archivo o ruta nula.")
-        page.dialog = ft.AlertDialog(
-            title=ft.Text("Error"),
-            content=ft.Text("No se seleccionó ningún archivo válido."),
+
+        def closeNull(e):
+            page.close(dlgNull)
+
+        dlgNull = ft.AlertDialog(
+            title=ft.Text("Error al procesar archivo", color="#000000"),
+            content=ft.Text("No se seleccionó ningún archivo válido.", color="#000000"),
+            actions=[
+                ft.TextButton(
+                    "Cerrar",
+                    on_click=closeNull,
+                    style=ft.ButtonStyle(
+                        color={"": "#FFFFFF"},
+                        bgcolor={"": "#8835D0", "hovered": "#B06EEB"}
+                    )
+                ),
+            ],
+            bgcolor="#eeeeee"
         )
-        page.dialog.open = True
+
+        page.open(dlgNull)
         page.update()
         return
 
@@ -136,21 +152,53 @@ def on_file_picked_step_5(files, page: ft.Page):
     try:
         # ✅ Procesar e insertar las facturas en MongoDB Atlas
         procesar_facturas([file_path])
-        mensaje = f" Archivo '{files[0].name}' procesado correctamente.\nFacturas insertadas en MongoDB Atlas."
+        mensaje = f"Archivo '{files[0].name}' procesado correctamente.\nFacturas insertadas en MongoDB Atlas."
 
-        page.dialog = ft.AlertDialog(
-            title=ft.Text("Éxito"),
-            content=ft.Text(mensaje),
+        def closeSuccess(e):
+            page.close(dlgSuccess)
+
+        dlgSuccess = ft.AlertDialog(
+            title=ft.Text("Procesamiento exitoso", color="#000000"),
+            content=ft.Text(mensaje, color="#000000"),
+            actions=[
+                ft.TextButton(
+                    "Cerrar",
+                    on_click=closeSuccess,
+                    style=ft.ButtonStyle(
+                        color={"": "#FFFFFF"},
+                        bgcolor={"": "#8835D0", "hovered": "#B06EEB"}
+                    )
+                ),
+            ],
+            bgcolor="#eeeeee"
         )
-        page.dialog.open = True
+
+        page.open(dlgSuccess)
 
     except Exception as ex:
         print(f"[DEBUG] Error al procesar archivo: {ex}")
-        page.dialog = ft.AlertDialog(
-            title=ft.Text("Error"),
-            content=ft.Text(str(ex))
+
+        def closeError(e):
+            page.close(dlgError)
+
+        dlgError = ft.AlertDialog(
+            title=ft.Text("Error al procesar archivo", color="#000000"),
+            # content=ft.Text(str(ex), color="#000000")
+            content=ft.Text("El formato del archivo es incorrecto", color="#000000"),
+            actions=[
+                ft.TextButton(
+                    "Cerrar",
+                    on_click=closeError,
+                    style=ft.ButtonStyle(
+                        color={"": "#FFFFFF"},
+                        bgcolor={"": "#8835D0", "hovered": "#B06EEB"}
+                    )
+                ),
+            ],
+            bgcolor="#eeeeee"
         )
-        page.dialog.open = True
+        
+        page.open(dlgError)
 
     page.update()
 

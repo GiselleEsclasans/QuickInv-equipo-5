@@ -1,11 +1,15 @@
 # main_view.py
 import flet as ft
-from data_model import cargar_datos, calcular_estadisticas
+from model_data import DataModel
 
 DARK_PURPLE = "#4A1976"
 DARK_PURPLE_2 = "#390865"
 LIGHT_PURPLE = "#9B5AA3"
 PURPLE = "#682471"
+
+
+
+
 
 def crear_appbar(page: ft.Page, current_route: str = "/") -> ft.Container:
     def get_color(route: str, target_route: str) -> str:
@@ -30,6 +34,21 @@ def crear_appbar(page: ft.Page, current_route: str = "/") -> ft.Container:
                             ),
                             padding=ft.padding.all(8),
                             bgcolor=get_color(current_route, "/"),
+                            border_radius=ft.border_radius.only(bottom_left=20, bottom_right=20),
+                        ),
+                        ft.Container(
+                            content=ft.ElevatedButton(
+                                "Historial",
+                                on_click=lambda _: page.go("/history"),
+                                bgcolor=get_color(current_route, "/history"),
+                                color=ft.colors.WHITE,
+                                style=ft.ButtonStyle(
+                                    overlay_color=ft.colors.with_opacity(0.5, LIGHT_PURPLE),
+                                ),
+                                elevation=0,
+                            ),
+                            padding=ft.padding.all(8),
+                            bgcolor=get_color(current_route, "/recohistoryrd"),
                             border_radius=ft.border_radius.only(bottom_left=20, bottom_right=20),
                         ),
                         ft.Container(

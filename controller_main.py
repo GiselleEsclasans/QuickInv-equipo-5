@@ -42,7 +42,7 @@ def route_change_step_5(e: ft.RouteChangeEvent):
                                     color=DARK_PURPLE,
                                 ),
                                 ft.Text(
-                                    "Arrastra un archivo .xlsx o .csv; o presiona \"Cargar Factura\"",
+                                    "presiona \"Cargar Factura\" para cargar un archivo .xlsx o .csv; ",
                                     size=18,
                                     color=PURPLE,
                                 ),

@@ -97,7 +97,7 @@ def crear_vista_analisis(page: ft.Page):
             ],
             alignment=ft.MainAxisAlignment.CENTER,
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-            spacing=30,
+            spacing=10,
         ),
         padding=5,
         border_radius=ft.border_radius.only(top_right=10, bottom_right=10),
@@ -146,7 +146,8 @@ def crear_vista_analisis(page: ft.Page):
                     graph_view,
                     data_view
                 ],
-                alignment=ft.MainAxisAlignment.CENTER,
+                alignment=ft.alignment.center,
+                
                 spacing=30
             )
         ],

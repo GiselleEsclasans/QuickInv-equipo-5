@@ -192,14 +192,17 @@ def crear_vista_inventario(page: ft.Page) -> ft.View:
 
     # Barra de búsqueda
     buscador_row = ft.Container(
-        width=500,
-        border_radius=40,
-        bgcolor=GRAY,
-        padding=10,
-        content=ft.Row(
-            controls=[buscador_textfield, btn_buscar],
-            alignment=ft.MainAxisAlignment.CENTER
-        )
+        content=ft.Container(
+            width=500,
+            border_radius=40,
+            bgcolor=GRAY,
+            padding=ft.padding.only(left=16),
+            content=ft.Row(
+                controls=[buscador_textfield, btn_buscar],
+                alignment=ft.MainAxisAlignment.CENTER
+            ),
+        ),
+        padding=ft.padding.only(left=64)
     )
 
     barra_busqueda = ft.Column(

@@ -25,6 +25,7 @@ def crear_appbar(page: ft.Page, current_route: str = "/") -> ft.Container:
                                 "Inicio",
                                 on_click=lambda _: page.go("/"),
                                 icon=ft.icons.HOME,
+                                icon_color="#FFFFFF",
                                 bgcolor=get_color(current_route, "/"),
                                 color=ft.colors.WHITE,
                                 style=ft.ButtonStyle(
@@ -40,6 +41,8 @@ def crear_appbar(page: ft.Page, current_route: str = "/") -> ft.Container:
                             content=ft.ElevatedButton(
                                 "Historial",
                                 on_click=lambda _: page.go("/history"),
+                                icon=ft.icons.HISTORY,
+                                icon_color="#FFFFFF",
                                 bgcolor=get_color(current_route, "/history"),
                                 color=ft.colors.WHITE,
                                 style=ft.ButtonStyle(
@@ -55,6 +58,8 @@ def crear_appbar(page: ft.Page, current_route: str = "/") -> ft.Container:
                             content=ft.ElevatedButton(
                                 "Inventario",
                                 on_click=lambda _: page.go("/inventory"),
+                                icon=ft.icons.INVENTORY,
+                                icon_color="#FFFFFF",
                                 bgcolor=get_color(current_route, "/inventory"),
                                 color=ft.colors.WHITE,
                                 style=ft.ButtonStyle(
@@ -70,6 +75,7 @@ def crear_appbar(page: ft.Page, current_route: str = "/") -> ft.Container:
                             content=ft.ElevatedButton(
                                 "Análisis de Datos",
                                 icon=ft.Icons.INSIGHTS,
+                                icon_color="#FFFFFF",
                                 on_click=lambda _: page.go("/analysis"),
                                 bgcolor=get_color(current_route, "/analysis"),
                                 color=ft.colors.WHITE,

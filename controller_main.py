@@ -2,7 +2,7 @@
 import flet as ft
 import pandas as pd
 from model_data import DataModel
-from controller_bill import procesar_facturas  
+from controller_bill import procesar_facturas
 from view_main import crear_appbar
 from view_analysis import crear_vista_analisis
 from view_inventory import crear_vista_inventario
@@ -54,7 +54,7 @@ def crear_vista_principal(page: ft.Page):
     """✅ Vista principal con opción para cargar facturas."""
     return ft.View(
         route="/",
-        bgcolor=ft.Colors.WHITE,
+        bgcolor=ft.colors.WHITE,
         appbar=crear_appbar(page, current_route="/"),
         controls=[
             ft.Container(
@@ -79,9 +79,9 @@ def crear_vista_principal(page: ft.Page):
                         ),
                         ft.ElevatedButton(
                             "Cargar Factura",
-                            icon=ft.Icons.UPLOAD_FILE,
+                            icon=ft.icons.UPLOAD_FILE,
                             bgcolor=DARK_PURPLE,
-                            color=ft.Colors.WHITE,
+                            color=ft.colors.WHITE,
                             on_click=lambda _: page.file_picker.pick_files(allow_multiple=False)
                         ),                    
                     ],

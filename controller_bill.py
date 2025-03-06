@@ -1,7 +1,109 @@
+import flet as ft
 import pandas as pd
 from model_data import DataModel
 
 data_model = DataModel()
+
+class FilePopUp(ft.AlertDialog):
+    def __init__(self, page: ft.Page):
+        super().__init__()
+        self.title: ft.Text = ft.Text(
+            None,
+            font_family= "Assets/Fonts/DMSans-Regular.ttf"   
+        )
+        self.content: ft.Text = ft.Text(
+            None,
+            font_family= "Assets/Fonts/DMSans-Regular.ttf",
+        )
+    def assignMessage(self, scenario: str, data: dict):
+        match scenario:
+            case "Éxito":
+                self.title.value = "¡Éxito!"
+                self.content.value = f"Archivo '{data["Archivo"]}' procesado correctamente.\nFacturas insertadas en MongoDB Atlas."
+            case "Error_Archivo_Nulo":
+                self.title.value = "Error"
+                self.content.value = "El archivo seleccionado no existe o es nulo."
+            case "Error_Tipo_Archivo":
+                self.title.value = "Error"
+                self.content.value = f"El archivo '{data["Archivo"]}' no es de tipo '.xlsx'\n¿Seleccionaste el archivo correcto?"
+            case "Error_Lectura_Excel":
+                self.title.value = "Error"
+                self.content.value = f"El archivo '{data["Archivo"]} es un archivo Excel ilegible.\n¿Comprobaste que funcionara?" 
+            case "Error_Contenido_Excel":
+                self.title.value = "Error"
+                contentText: str = ""
+                for error in data["Errores"]:
+                    if (contentText != ""):
+                        contentText += "\n"
+                    match error["Tipo_Error"]:
+                        case "Producto_Inexistente":
+                            contentText += f"El producto {error["Producto"]}, del archivo {error["Archivo"]}, no existe en inventario."
+                        case "Stock_Insuficiente":
+                            contentText += f"El Stock disponible de {error["Producto"]} es de {error["Cantidad_Disponible"]}, pero en la factura {error["Archivo"]} se solicitan {error["Cantidad_Solicitada"]} unidades, lo que no es factible."
+                        case "Precio_Incoherente":
+                            contentText += f"En {error["Archivo"]}, se lista el precio de {error["Producto"]} como {error["Precio_Indicado"]} pero su precio real es {error["Precio_Real"]}"
+                self.content.value = contentText
+
+def fileHandler(files, page: ft.Page):
+    alert = FilePopUp(page)
+    if ((files == None) or (files[0].path == None)):
+        alert.assignMessage("Error_Archivo_Nulo", None)
+        page.open(alert)
+        return
+    
+    failedFilePointer: int = 0
+    passesFileTypeCheck = fileTypeCheck(files, failedFilePointer)
+    if (passesFileTypeCheck == False):
+        alert.assignMessage("Error_Tipo_Archivo", {"Archivo": files[failedFilePointer].name})
+        page.open(alert)
+        return
+    
+    failedExcelPointer: int = 0
+    passesExcelReadCheck = excelIsReadableCheck(files, failedExcelPointer)
+    if (passesExcelReadCheck == False):
+        alert.assignMessage("Error_Lectura_Excel", {"Archivo": files[failedExcelPointer].name})
+        page.open(alert)
+        return
+
+    for i in range (len(files)):
+        try:
+            # ✅ Procesar e insertar las facturas en MongoDB Atlas
+            procesar_facturas(alert, page, files)
+            mensaje = f" Archivo '{files[0].name}' procesado correctamente.\nFacturas insertadas en MongoDB Atlas."
+
+            page.dialog = ft.AlertDialog(
+                title=ft.Text("Éxito"),
+                content=ft.Text(mensaje),
+            )
+            page.dialog.open = True
+
+        except Exception as ex:
+            print(f"[DEBUG] Error al procesar archivo: {ex}")
+            page.dialog = ft.AlertDialog(
+                title=ft.Text("Error"),
+                content=ft.Text(str(ex))
+            )
+            page.dialog.open = True
+            page.update()
+
+def fileTypeCheck(files, failedFilePointer:int) -> bool:
+    validState = True
+    for i in range(len(files)):
+        if files[i].path.endswith('.xlsx') == False:
+            failedFilePointer = i
+            validState = False
+            break
+    return validState
+
+def excelIsReadableCheck(files, failedFilePointer:int) -> bool:
+    validState = True
+    for i in range(len(files)):
+        dataFrame = pd.read_excel(files[i].path)
+        if (dataFrame is None):
+            failedFilePointer = i
+            validState = False
+            break
+    return validState
 
 def validar_fila(fila, index, archivo):
     """✅ Valida los datos antes de procesarlos."""
@@ -36,19 +138,14 @@ def validar_fila(fila, index, archivo):
     return True, producto
 
 
-def procesar_facturas(archivos):
+def procesar_facturas(alert: FilePopUp, page:ft.Page, files):
     """✅ Procesa archivos de facturas en `.xlsx` y descuenta stock después de la inserción en MongoDB."""
     facturas_procesadas = {}
+    errors = []
 
-    for archivo in archivos:
-        if not archivo.endswith('.xlsx'):
-            print(f"[ERROR] El archivo {archivo} no es un formato válido. Solo se aceptan `.xlsx`.")
-            continue
-        
-        df = pd.read_excel(archivo)
-        if df is None:
-            print(f"[ERROR] No se pudo leer el archivo {archivo}.")
-            continue
+    for file in files:
+        print(f"[DEBUG] Procesando archivo: {file.name}")
+        df = pd.read_excel(file.path)
 
         for index, fila in df.iterrows():
             try:
@@ -63,6 +160,11 @@ def procesar_facturas(archivos):
                 producto = data_model.obtener_producto(categoria, id_producto)
                 if not producto:
                     print(f"[ERROR] Producto '{id_producto}' no encontrado en inventario. Factura {numero_factura} no se procesará.")
+                    errors.append({
+                        "Archivo": file.name,
+                        "Tipo_Error": "Producto_Inexistente",
+                        "Producto": {id_producto}
+                    })
                     continue  # No procesa la factura si el producto no existe
                 
                 # ✅ Verificar que haya stock suficiente
@@ -70,6 +172,13 @@ def procesar_facturas(archivos):
                     print(f"Stock insuficiente para el producto {producto['nombre_producto']} (ID: {id_producto}).")
                     print(f"   Stock disponible: {producto['cantidad_disponible']}, cantidad requerida: {cantidad_vendida}.")
                     print(f"    Factura {numero_factura} no se procesará debido a falta de stock.")
+                    errors.append({
+                        "Archivo": file.name,
+                        "Tipo_Error": "Stock_Insuficiente",
+                        "Producto": {id_producto},
+                        "Cantidad_Solicitada": cantidad_vendida,
+                        "Cantidad_Disponible": producto["cantidad_disponible"]
+                    })
                     continue  # ❌ No procesa la factura si no hay suficiente stock
                 
                 # ✅ Verificar que el precio unitario coincida con el del inventario
@@ -78,6 +187,13 @@ def procesar_facturas(archivos):
                     print(f" Precio incorrecto en Factura {numero_factura} para el producto {producto['nombre_producto']} (ID: {id_producto}).")
                     print(f"   Precio en inventario: {precio_inventario}, precio en factura: {precio_factura}.")
                     print(f"    Factura {numero_factura} no se procesará debido a discrepancia de precio.")
+                    errors.append({
+                        "Archivo": file.name,
+                        "Tipo_Error": "Precio_Incoherente",
+                        "Producto": {id_producto},
+                        "Precio_Indicado": precio_factura,
+                        "Precio_Real": precio_inventario
+                    })
                     continue  # ❌ No procesa la factura si el precio no coincide
 
                 # ✅ Validar la fila antes de procesarla
@@ -110,16 +226,19 @@ def procesar_facturas(archivos):
                 print(f" Factura {numero_factura} procesada correctamente.")
 
             except Exception as e:
-                print(f"[ERROR] Error inesperado en {archivo}, fila {index + 2}, factura {numero_factura}: {e}")
+                print(f"[ERROR] Error inesperado en {file}, fila {index + 2}, factura {numero_factura}: {e}")
                 continue
+    if (len(errors) > 0):
+        alert.assignMessage("Error_Contenido_Excel", {"Errores": errors})
+        page.open(alert)
 
     # ✅ Insertar facturas válidas y descontar stock
-    if facturas_procesadas:
-        data_model.insertar_facturas(list(facturas_procesadas.values()))
+    # if facturas_procesadas:
+        # data_model.insertar_facturas(list(facturas_procesadas.values()))
 
         # 🔹 Después de insertar las facturas, descontar stock en `inventario_col`
-        for factura in facturas_procesadas.values():
-            for producto in factura["productos"]:
-                data_model.descontar_stock(producto["id_producto"],producto["categoria"], producto["cantidad"], factura["fecha"])
+        # for factura in facturas_procesadas.values():
+        #    for producto in factura["productos"]:
+        #        data_model.descontar_stock(producto["id_producto"],producto["categoria"], producto["cantidad"], factura["fecha"])
 
-        print(f"\n {len(facturas_procesadas)} facturas insertadas correctamente en MongoDB Atlas.")
+        # print(f"\n {len(facturas_procesadas)} facturas insertadas correctamente en MongoDB Atlas.")

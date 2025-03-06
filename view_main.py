@@ -7,10 +7,6 @@ DARK_PURPLE_2 = "#390865"
 LIGHT_PURPLE = "#9B5AA3"
 PURPLE = "#682471"
 
-
-
-
-
 def crear_appbar(page: ft.Page, current_route: str = "/") -> ft.Container:
     def get_color(route: str, target_route: str) -> str:
         return PURPLE if route == target_route else DARK_PURPLE
@@ -69,7 +65,7 @@ def crear_appbar(page: ft.Page, current_route: str = "/") -> ft.Container:
                         ft.Container(
                             content=ft.ElevatedButton(
                                 "Análisis de Datos",
-                                icon=ft.Icons.INSIGHTS,
+                                icon=ft.icons.INSIGHTS,
                                 on_click=lambda _: page.go("/analysis"),
                                 bgcolor=get_color(current_route, "/analysis"),
                                 color=ft.colors.WHITE,

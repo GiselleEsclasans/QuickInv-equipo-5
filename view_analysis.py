@@ -7,25 +7,32 @@ LIGHT_PURPLE = "#9B5AA3"
 PURPLE = "#682471"
 DARK_BLUE = "#1E0039"
 
+def resizeComponent(container: ft.Container, page: ft.Page):
+    container.height = (page.height * 0.85),
+    container.width = (page.width * 0.15)
+
 def crear_vista_analisis(page: ft.Page):
     option_view = ft.Container(
+        widthPercent = 0.15,
+        heightPercent = 0.85,
+
         col = 1,
         bgcolor=DARK_PURPLE_2,
-        
+
         content=ft.Column(
             controls=[
                 ft.Container(
                     content=ft.ElevatedButton(
                         content=ft.Text(
                             "Horarios Críticos",
-                            color=ft.Colors.WHITE,
+                            color=ft.colors.WHITE,
                             size=14,
                             text_align=ft.TextAlign.CENTER,
                             rotate=ft.Rotate(angle=-1.57),
                         ),
                         bgcolor=DARK_PURPLE_2,
                         style=ft.ButtonStyle(
-                            overlay_color=ft.Colors.with_opacity(0.5, LIGHT_PURPLE),
+                            overlay_color=ft.colors.with_opacity(0.5, LIGHT_PURPLE),
                         ),
                         elevation=0,
                         
@@ -38,14 +45,14 @@ def crear_vista_analisis(page: ft.Page):
                     content=ft.ElevatedButton(
                         content=ft.Text(
                             "Desempeño Financiero",
-                            color=ft.Colors.WHITE,
+                            color=ft.colors.WHITE,
                             size=14,
                             text_align=ft.TextAlign.CENTER,
                             rotate=ft.Rotate(angle=-1.57),
                         ),
                         bgcolor=DARK_PURPLE_2,
                         style=ft.ButtonStyle(
-                            overlay_color=ft.Colors.with_opacity(0.5, LIGHT_PURPLE),
+                            overlay_color=ft.colors.with_opacity(0.5, LIGHT_PURPLE),
                         ),
                         elevation=0,
                      
@@ -58,14 +65,14 @@ def crear_vista_analisis(page: ft.Page):
                     content=ft.ElevatedButton(
                         content=ft.Text(
                             "Ventas/Día",
-                            color=ft.Colors.WHITE,
+                            color=ft.colors.WHITE,
                             size=14,
                             text_align=ft.TextAlign.CENTER,
                             rotate=ft.Rotate(angle=-1.57),
                         ),
                         bgcolor=DARK_PURPLE_2,
                         style=ft.ButtonStyle(
-                            overlay_color=ft.Colors.with_opacity(0.5, LIGHT_PURPLE),
+                            overlay_color=ft.colors.with_opacity(0.5, LIGHT_PURPLE),
                         ),
                         elevation=0,
                        
@@ -78,14 +85,14 @@ def crear_vista_analisis(page: ft.Page):
                     content=ft.ElevatedButton(
                         content=ft.Text(
                             "Ventas/Hora",
-                            color=ft.Colors.WHITE,
+                            color=ft.colors.WHITE,
                             size=14,
                             text_align=ft.TextAlign.CENTER,
                             rotate=ft.Rotate(angle=-1.57),
                         ),
                         bgcolor=DARK_PURPLE_2,
                         style=ft.ButtonStyle(
-                            overlay_color=ft.Colors.with_opacity(0.5, LIGHT_PURPLE),
+                            overlay_color=ft.colors.with_opacity(0.5, LIGHT_PURPLE),
                         ),
                         elevation=0,
                        
@@ -104,12 +111,14 @@ def crear_vista_analisis(page: ft.Page):
     )
 
     graph_view = ft.Container(
+        widthPercent = 0.60,
+        heightPercent = 0.85,
         col = 6,
         bgcolor=LIGHT_PURPLE,
         border_radius=10,
         content=ft.Text(
             "(Gráfico aquí)",
-            color=ft.Colors.WHITE,
+            color=ft.colors.WHITE,
             size=24,
             text_align=ft.TextAlign.CENTER,
         ),
@@ -120,12 +129,14 @@ def crear_vista_analisis(page: ft.Page):
     )
 
     data_view = ft.Container(
+        widthPercent = 0.20,
+        heightPercent = 0.85,
         col = 5,
         bgcolor=DARK_BLUE,
         border_radius=10,
         content=ft.Text(
             "(Datos aquí)",
-            color=ft.Colors.WHITE,
+            color=ft.colors.WHITE,
             size=24,
             text_align=ft.TextAlign.CENTER,
         ),
@@ -137,7 +148,7 @@ def crear_vista_analisis(page: ft.Page):
 
     return ft.View(
         route="/analysis",
-        bgcolor=ft.Colors.WHITE,
+        bgcolor=ft.colors.WHITE,
         appbar=crear_appbar(page, current_route="/analysis"),
         controls=[
             ft.ResponsiveRow(

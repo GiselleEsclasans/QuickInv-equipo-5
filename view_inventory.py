@@ -170,7 +170,7 @@ def crear_vista_inventario(page: ft.Page) -> ft.View:
 
     vista_inventario = ft.View(
         route="/inventory",
-        bgcolor=ft.Colors.WHITE,
+        bgcolor=ft.colors.WHITE,
         appbar=crear_appbar(page, current_route="/inventory"),
         controls=[columna_principal],
     )

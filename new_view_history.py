@@ -1,13 +1,7 @@
 import flet as ft
-from view_main import crear_appbar
+from _components import NavBar, PURPLE, DARK_PURPLE
 from model_data import DataModel
 from datetime import datetime
-
-DARK_PURPLE = "#4A1976"
-DARK_PURPLE_2 = "#390865"
-LIGHT_PURPLE = "#9B5AA3"
-PURPLE = "#682471"
-GRAY = "#D9D9D9"
 
 data_model = DataModel()
 
@@ -121,32 +115,30 @@ def cerrar_dialogo(dialogo, page):
     dialogo.open = False
     page.update()
 
+class historyView(ft.View):
+    def __init__(self, page:ft.Page):
+        super().__init__()
+        self.bgcolor = ft.colors.WHITE
+        self.route = "/history"
 
-def crear_vista_historial(page: ft.Page):
-    """✅ Vista del historial de facturas cargadas, optimizada para mostrar más facturas y reducir espacios en blanco."""
+        lista_facturas = ft.ListView(
+            expand=True, 
+            spacing=5,  # 🔹 Reducimos el espacio entre facturas
+            auto_scroll=True  
+        )
+        lista_fechas = ft.Dropdown(
+            options=[],
+            value=None,
+            on_change=lambda e: cargar_facturas_por_dia(e.control.value, lista_facturas, page)
+        )
 
-    lista_fechas = ft.Dropdown(
-        options=[],
-        value=None,
-        on_change=lambda e: cargar_facturas_por_dia(e.control.value, lista_facturas, page)
-    )
-
-    lista_facturas = ft.ListView(
-        expand=True, 
-        spacing=5,  # 🔹 Reducimos el espacio entre facturas
-        auto_scroll=True  
-    )
-
-    vista = ft.View(
-        route="/history",
-        bgcolor=ft.colors.WHITE,
-        appbar=crear_appbar(page, current_route="/history"),
-        controls=[
+        self.controls = [
+            NavBar(page, 1),
             ft.Column(
                 [
                     ft.Text("📅 Selecciona una fecha para ver las facturas:", size=16, color=PURPLE),
                     lista_fechas,
-                    ft.Divider(color=GRAY),
+                    ft.Divider(color=ft.colors.GREY),
                     ft.Text("📜 Facturas del día:", size=16, weight=ft.FontWeight.BOLD, color=DARK_PURPLE),
                     ft.Container(
                         content=lista_facturas,
@@ -164,11 +156,3 @@ def crear_vista_historial(page: ft.Page):
                 expand=True,
             )
         ]
-    )
-
-    page.views.append(vista)
-    page.update()
-    
-    cargar_fechas(lista_fechas, lista_facturas, page)  
-
-    return vista

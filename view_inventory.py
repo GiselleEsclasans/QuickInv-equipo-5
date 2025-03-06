@@ -71,13 +71,13 @@ def crear_vista_inventario(page: ft.Page) -> ft.View:
                 ajuste_str = ajuste_str[1:]
             try:
                 ajuste_val = int(ajuste_str)
-                cant_actual = int(cantidad_label.value)
+                cant_actual = int(cantidad_label.value.strip("Cant: "))
                 nueva_cant = cant_actual + ajuste_val
                 if nueva_cant < 0:
                     print("[ERROR] Ajuste resultaría en inventario negativo.")
                     return
                 data_model.actualizar_inventario_cantidad(prod["id_producto"], nueva_cant)
-                cantidad_label.value = str(nueva_cant)
+                cantidad_label.value = "Cant: " + str(nueva_cant)
                 cantidad_label.update()
                 ajuste_input.value = ""
                 ajuste_input.update()
@@ -115,7 +115,7 @@ def crear_vista_inventario(page: ft.Page) -> ft.View:
 
         cats = data_model.get_categorias()
         for cat in cats:
-            col_productos = ft.Column(spacing=5)
+            col_productos = ft.Column(spacing=10)
             prods = data_model.get_inventario_de_categoria(cat)
 
             # Filtrar si es necesario
@@ -140,7 +140,8 @@ def crear_vista_inventario(page: ft.Page) -> ft.View:
                             weight=ft.FontWeight.BOLD,
                             color=PURPLE
                         ),
-                        padding=ft.padding.all(16)
+                        padding=ft.padding.all(16),
+                        border_radius=24
                     ),
                     content=col_productos,
                     bgcolor="#EEE6F0",
@@ -194,7 +195,7 @@ def crear_vista_inventario(page: ft.Page) -> ft.View:
     # Barra de búsqueda
     buscador_row = ft.Container(
         content=ft.Container(
-            width=500,
+            width=1000,
             border_radius=40,
             bgcolor=GRAY,
             padding=ft.padding.only(left=16),
@@ -209,7 +210,7 @@ def crear_vista_inventario(page: ft.Page) -> ft.View:
                 blur_style=ft.ShadowBlurStyle.OUTER,
             ),
         ),
-        padding=ft.padding.only(left=64, top=12)
+        padding=ft.padding.only(left=16, top=12)
     )
 
     barra_busqueda = ft.Column(

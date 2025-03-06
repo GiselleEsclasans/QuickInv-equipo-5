@@ -51,7 +51,7 @@ def crear_appbar(page: ft.Page, current_route: str = "/") -> ft.Container:
                                 elevation=0,
                             ),
                             padding=ft.padding.all(8),
-                            bgcolor=get_color(current_route, "/recohistoryrd"),
+                            bgcolor=get_color(current_route, "/history"),
                             border_radius=ft.border_radius.only(bottom_left=20, bottom_right=20),
                         ),
                         ft.Container(

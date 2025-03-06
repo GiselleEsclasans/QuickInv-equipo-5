@@ -186,7 +186,8 @@ def crear_vista_inventario(page: ft.Page) -> ft.View:
         style=ft.ButtonStyle(
             color={"": "#FFFFFF"},
             bgcolor={"": "#8835D0", "hovered": "#B06EEB"},
-            padding=12
+            padding=12,
+            elevation={"": 4},
         )
     )
 
@@ -201,8 +202,14 @@ def crear_vista_inventario(page: ft.Page) -> ft.View:
                 controls=[buscador_textfield, btn_buscar],
                 alignment=ft.MainAxisAlignment.CENTER
             ),
+            shadow=ft.BoxShadow(
+                blur_radius=5,
+                color="#777777",
+                # offset=ft.Offset(0, 5),
+                blur_style=ft.ShadowBlurStyle.OUTER,
+            ),
         ),
-        padding=ft.padding.only(left=64)
+        padding=ft.padding.only(left=64, top=12)
     )
 
     barra_busqueda = ft.Column(

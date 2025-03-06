@@ -101,6 +101,12 @@ def crear_appbar(page: ft.Page, current_route: str = "/") -> ft.Container:
             alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
         ),
         bgcolor=DARK_PURPLE,
+        shadow=ft.BoxShadow(
+            blur_radius=10,
+            color=ft.colors.BLACK,
+            # offset=ft.Offset(0, 5),
+            blur_style=ft.ShadowBlurStyle.OUTER,
+        ),
         border_radius=ft.border_radius.only(bottom_left=20, bottom_right=20),
         margin=ft.margin.all(0),
         width=page.width,

@@ -193,7 +193,7 @@ def crear_vista_historial(page: ft.Page):
                             style=ft.ButtonStyle(
                                 color={"": "#FFFFFF"},
                                 bgcolor={"": "#8835D0", "hovered": "#B06EEB"},
-                                padding=12,
+                                padding=16,
                                 elevation={"": 4},
                             )
                         ),

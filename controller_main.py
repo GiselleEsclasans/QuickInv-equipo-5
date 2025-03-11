@@ -80,9 +80,16 @@ def crear_vista_principal(page: ft.Page):
                         ft.ElevatedButton(
                             "Cargar Factura",
                             icon=ft.Icons.UPLOAD_FILE,
+                            icon_color="#FFFFFF",
                             bgcolor=DARK_PURPLE,
                             color=ft.Colors.WHITE,
-                            on_click=lambda _: page.file_picker.pick_files(allow_multiple=False)
+                            on_click=lambda _: page.file_picker.pick_files(allow_multiple=False),
+                            style=ft.ButtonStyle(
+                                color={"": "#FFFFFF"},
+                                bgcolor={"": "#8835D0", "hovered": "#B06EEB"},
+                                padding=16,
+                                elevation={"": 4},
+                            )
                         ),                    
                     ],
                     alignment=ft.MainAxisAlignment.CENTER,

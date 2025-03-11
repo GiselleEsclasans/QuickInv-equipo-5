@@ -179,17 +179,20 @@ def crear_vista_inventario(page: ft.Page) -> ft.View:
         on_click=buscar_producto,
         icon_color="#8934D0"
     )
-    btn_recargar = ft.ElevatedButton(
-        "Recargar Inventario",
-        icon=ft.icons.REFRESH,
-        icon_color="#FFFFFF",
-        on_click=recargar_inventario,
-        style=ft.ButtonStyle(
-            color={"": "#FFFFFF"},
-            bgcolor={"": "#8835D0", "hovered": "#B06EEB"},
-            padding=12,
-            elevation={"": 4},
-        )
+    btn_recargar = ft.Container(
+        content=ft.ElevatedButton(
+            "Recargar Inventario",
+            icon=ft.icons.REFRESH,
+            icon_color="#FFFFFF",
+            on_click=recargar_inventario,
+            style=ft.ButtonStyle(
+                color={"": "#FFFFFF"},
+                bgcolor={"": "#8835D0", "hovered": "#B06EEB"},
+                padding=20,
+                elevation={"": 4},
+            )
+        ),
+        padding=ft.padding.only(right=16),
     )
 
     # Barra de búsqueda
@@ -220,11 +223,20 @@ def crear_vista_inventario(page: ft.Page) -> ft.View:
         spacing=20
     )
 
+    fila = ft.Container(
+        content=ft.Row(
+            controls=[
+                barra_busqueda,
+                btn_recargar
+            ],
+            alignment=ft.MainAxisAlignment.SPACE_BETWEEN
+        )
+    )
+
     # Columna principal
     columna_principal = ft.Column(
         controls=[
-            barra_busqueda,
-            btn_recargar,
+            fila,
             scroll_column  # con summary_label y paneles_categorias
         ],
         spacing=20,

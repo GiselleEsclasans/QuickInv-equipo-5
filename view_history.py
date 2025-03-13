@@ -59,7 +59,9 @@ def cargar_facturas_por_dia(fecha_str, lista_facturas, page):
                 lista_facturas.controls.append(
                     ft.ListTile(
                         title=ft.Text(f"📄 Factura N° {factura['numero_factura']} - {factura['cliente']['nombre']}"),
-                        on_click=lambda e, f=factura: mostrar_detalle_factura(f, page)  # ✅ Pasar factura y página
+                        on_click=lambda e, f=factura: mostrar_detalle_factura(f, page),  # ✅ Pasar factura y página
+                        text_color="#FFFFFF",
+                        bgcolor="#BA62C4"
                     )
                 )
 
@@ -77,33 +79,41 @@ def mostrar_detalle_factura(factura, page):
 
     detalle_factura = ft.Column(
         [
-            ft.Text(f"📅 Fecha: {factura.get('fecha', 'N/A')}"),
-            ft.Text(f"🧾 Factura N°: {factura.get('numero_factura', 'N/A')}"),
-            ft.Text(f"👤 Cliente: {factura.get('cliente', {}).get('nombre', 'N/A')} (ID: {factura.get('cliente', {}).get('id_cliente', 'N/A')})"),
+            ft.Text(f"📅 Fecha: {factura.get('fecha', 'N/A')}", color="#000000"),
+            ft.Text(f"🧾 Factura N°: {factura.get('numero_factura', 'N/A')}", color="#000000"),
+            ft.Text(f"👤 Cliente: {factura.get('cliente', {}).get('nombre', 'N/A')} (ID: {factura.get('cliente', {}).get('id_cliente', 'N/A')})", color="#000000"),
             ft.Divider(),
-            ft.Text("🛒 Productos Comprados:", weight=ft.FontWeight.BOLD),
+            ft.Text("🛒 Productos Comprados:", weight=ft.FontWeight.BOLD, color="#000000"),
             ft.ListView(
                 controls=[
-                    ft.Text(f"- {p.get('nombre_producto', 'Producto Desconocido')} (x{p.get('cantidad', 0)}) - ${p.get('subtotal', 0.0):.2f}")
+                    ft.Text(f"- {p.get('nombre_producto', 'Producto Desconocido')} (x{p.get('cantidad', 0)}) - ${p.get('subtotal', 0.0):.2f}", color="#000000")
                     for p in factura.get("productos", [])
                 ],
                 spacing=5
             ),
             ft.Divider(),
-            ft.Text(f"💰 Total: ${factura.get('total_factura', 0.0):.2f}", size=18, weight=ft.FontWeight.BOLD),
+            ft.Text(f"💰 Total: ${factura.get('total_factura', 0.0):.2f}", size=18, weight=ft.FontWeight.BOLD, color="#000000"),
         ],
         spacing=10
     )
 
 
     dialogo_factura = ft.AlertDialog(
-        title=ft.Text("📄 Detalle de Factura"),
+        title=ft.Text("Detalle de Factura", weight=ft.FontWeight.BOLD, color="#000000"),
         content=detalle_factura,
         modal = True,
         actions=[
-            ft.ElevatedButton("Cerrar", on_click=lambda _: cerrar_dialogo(dialogo_factura, page))
+            ft.ElevatedButton(
+                "Cerrar",
+                on_click=lambda _: cerrar_dialogo(dialogo_factura, page),
+                style=ft.ButtonStyle(
+                    color={"": "#FFFFFF"},
+                    bgcolor={"": "#8835D0", "hovered": "#B06EEB"}
+                )
+            )
         ],
         on_dismiss=lambda e: page.update(),
+        bgcolor="#FCEBFF"
     )
 
   
@@ -129,13 +139,20 @@ def crear_vista_historial(page: ft.Page):
     lista_fechas = ft.Dropdown(
         options=[],
         value=None,
-        on_change=lambda e: cargar_facturas_por_dia(e.control.value, lista_facturas, page)
+        on_change=lambda e: cargar_facturas_por_dia(e.control.value, lista_facturas, page),
+        bgcolor=GRAY,
+        border=GRAY,
+        color="#534D54",
+        icon_enabled_color="#534D54",
+        border_color=GRAY,
+        border_radius=ft.border_radius.all(20),
+        padding=ft.padding.only(left=8)
     )
 
     lista_facturas = ft.ListView(
         expand=True, 
-        spacing=5,  # 🔹 Reducimos el espacio entre facturas
-        auto_scroll=True  
+        spacing=4,  # 🔹 Reducimos el espacio entre facturas
+        auto_scroll=True
     )
 
     vista = ft.View(
@@ -145,24 +162,48 @@ def crear_vista_historial(page: ft.Page):
         controls=[
             ft.Column(
                 [
-                    ft.Text("📅 Selecciona una fecha para ver las facturas:", size=16, color=PURPLE),
-                    lista_fechas,
+                    ft.Text(
+                        "📅 Selecciona una fecha para ver las facturas:",
+                        size=16,
+                        weight=ft.FontWeight.W_400,
+                        color=PURPLE
+                    ),
+                    ft.Container(
+                        content=lista_fechas,
+                        padding=ft.padding.symmetric(horizontal=8)
+                    ),
                     ft.Divider(color=GRAY),
-                    ft.Text("📜 Facturas del día:", size=16, weight=ft.FontWeight.BOLD, color=DARK_PURPLE),
+                    ft.Text(
+                        "📜 Facturas del día:",
+                        size=16,
+                        weight=ft.FontWeight.W_800,
+                        color=DARK_PURPLE
+                    ),
                     ft.Container(
                         content=lista_facturas,
                         expand=True,
                         height=400,  # 🔹 Ajustamos la altura para mostrar más facturas
                     ),
                     ft.Container(
-                        content=ft.ElevatedButton("⬅ Volver", on_click=lambda _: page.go("/")),
-                        padding=ft.padding.only(top=10, bottom=10),
+                        content=ft.ElevatedButton(
+                            "⬅ Volver",
+                            on_click=lambda _: page.go("/"),
+                            color="#FFFFFF",
+                            bgcolor="#692470",
+                            style=ft.ButtonStyle(
+                                color={"": "#FFFFFF"},
+                                bgcolor={"": "#8835D0", "hovered": "#B06EEB"},
+                                padding=16,
+                                elevation={"": 4},
+                            )
+                        ),
+                        padding=ft.padding.only(top=10, bottom=10)
                     ),
                 ],
                 alignment=ft.MainAxisAlignment.START,  # 🔹 Subimos todo más arriba
                 horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                 spacing=10,  # 🔹 Reducimos el espacio vertical
-                expand=True,
+                expand=True
             )
         ]
     )

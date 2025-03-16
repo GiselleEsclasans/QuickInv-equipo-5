@@ -145,10 +145,43 @@ class DataModel:
         )
         print(f"[DEBUG] Inventario '{producto['nombre_producto']}' actualizado a {nueva_cantidad}.")
 
- # -------------------------------
+    # -------------------------------
     # Nuevas funciones para análisis
     # -------------------------------
+    def raw_ventas_por_hora(self, fecha_dt):
+        """Retorna datos crudos de (hour, producto, total) para la fecha dada."""
+        pipeline = [
+            {"$match": {"fecha": fecha_dt}},  # asumiendo que 'fecha' es un campo Date en Mongo
+            {"$unwind": "$productos"},
+            {"$project": {
+                "hour": {"$substrCP": ["$hora", 0, 2]},  # 'hora' es string 'HH:MM:SS'
+                "producto": "$productos.nombre_producto",
+                "cantidad": "$productos.cantidad"
+            }},
+            {"$group": {
+                "_id": {"hour": "$hour", "producto": "$producto"},
+                "total": {"$sum": "$cantidad"}
+            }},
+            {"$sort": {"_id.hour": 1}}  # se ordena primero por hour asc
+        ]
+        results = self.coleccion_facturas.aggregate(pipeline)
+
+        # Retornamos en forma de lista de dict
+        # [{"hour": "08", "producto": "Prod A", "total": 5}, ...]
+        data_list = []
+        for r in results:
+            data_list.append({
+                "hour": r["_id"]["hour"],
+                "producto": r["_id"]["producto"],
+                "total": r["total"]
+            })
+        return data_list
+
     def ventas_por_hora(self, fecha):
+        """ Retorna (hora, top_product, total) 
+            (Simplificada, quedando con 1 producto top) 
+            => Lo usabas antes, si ya no lo necesitas, puedes borrarlo.
+        """
         pipeline = [
             {"$match": {"fecha": fecha}},
             {"$unwind": "$productos"},

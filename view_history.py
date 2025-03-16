@@ -57,11 +57,14 @@ def cargar_facturas_por_dia(fecha_str, lista_facturas, page):
         else:
             for factura in facturas:
                 lista_facturas.controls.append(
-                    ft.ListTile(
-                        title=ft.Text(f"📄 Factura N° {factura['numero_factura']} - {factura['cliente']['nombre']}"),
-                        on_click=lambda e, f=factura: mostrar_detalle_factura(f, page),  # ✅ Pasar factura y página
-                        text_color="#FFFFFF",
-                        bgcolor="#BA62C4"
+                    ft.Container(
+                        content=ft.ListTile(
+                            title=ft.Text(f"📄 Factura N° {factura['numero_factura']} - {factura['cliente']['nombre']}"),
+                            on_click=lambda e, f=factura: mostrar_detalle_factura(f, page),  # ✅ Pasar factura y página
+                            text_color="#FFFFFF",
+                            bgcolor="#BA62C4"
+                        ),
+                        border_radius=16
                     )
                 )
 
@@ -160,50 +163,53 @@ def crear_vista_historial(page: ft.Page):
         bgcolor=ft.Colors.WHITE,
         appbar=crear_appbar(page, current_route="/history"),
         controls=[
-            ft.Column(
-                [
-                    ft.Text(
-                        "📅 Selecciona una fecha para ver las facturas:",
-                        size=16,
-                        weight=ft.FontWeight.W_400,
-                        color=PURPLE
-                    ),
-                    ft.Container(
-                        content=lista_fechas,
-                        padding=ft.padding.symmetric(horizontal=8)
-                    ),
-                    ft.Divider(color=GRAY),
-                    ft.Text(
-                        "📜 Facturas del día:",
-                        size=16,
-                        weight=ft.FontWeight.W_800,
-                        color=DARK_PURPLE
-                    ),
-                    ft.Container(
-                        content=lista_facturas,
-                        expand=True,
-                        height=400,  # 🔹 Ajustamos la altura para mostrar más facturas
-                    ),
-                    ft.Container(
-                        content=ft.ElevatedButton(
-                            "⬅ Volver",
-                            on_click=lambda _: page.go("/"),
-                            color="#FFFFFF",
-                            bgcolor="#692470",
-                            style=ft.ButtonStyle(
-                                color={"": "#FFFFFF"},
-                                bgcolor={"": "#8835D0", "hovered": "#B06EEB"},
-                                padding=16,
-                                elevation={"": 4},
-                            )
+            ft.Container(    
+                content=ft.Column(
+                    [
+                        ft.Text(
+                            "📅 Selecciona una fecha para ver las facturas:",
+                            size=16,
+                            weight=ft.FontWeight.W_400,
+                            color=PURPLE
                         ),
-                        padding=ft.padding.only(top=10, bottom=10)
-                    ),
-                ],
-                alignment=ft.MainAxisAlignment.START,  # 🔹 Subimos todo más arriba
-                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                spacing=10,  # 🔹 Reducimos el espacio vertical
-                expand=True
+                        ft.Container(
+                            content=lista_fechas,
+                            padding=ft.padding.symmetric(horizontal=8)
+                        ),
+                        ft.Divider(color=GRAY),
+                        ft.Text(
+                            "📜 Facturas del día:",
+                            size=16,
+                            weight=ft.FontWeight.W_800,
+                            color=DARK_PURPLE
+                        ),
+                        ft.Container(
+                            content=lista_facturas,
+                            expand=True,
+                            height=400,  # 🔹 Ajustamos la altura para mostrar más facturas
+                        ),
+                        ft.Container(
+                            content=ft.ElevatedButton(
+                                "⬅ Volver",
+                                on_click=lambda _: page.go("/"),
+                                color="#FFFFFF",
+                                bgcolor="#692470",
+                                style=ft.ButtonStyle(
+                                    color={"": "#FFFFFF"},
+                                    bgcolor={"": "#8835D0", "hovered": "#B06EEB"},
+                                    padding=16,
+                                    elevation={"": 4},
+                                )
+                            ),
+                            padding=ft.padding.only(top=10, bottom=10)
+                        ),
+                    ],
+                    alignment=ft.MainAxisAlignment.START,  # 🔹 Subimos todo más arriba
+                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                    spacing=10,  # 🔹 Reducimos el espacio vertical
+                    expand=True
+                ),
+                margin=ft.margin.only(top=12)
             )
         ]
     )

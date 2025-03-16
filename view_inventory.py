@@ -95,18 +95,36 @@ def crear_vista_inventario(page: ft.Page) -> ft.View:
 
         return ft.Row(
             controls=[
-                ft.Text(
-                    prod["nombre_producto"],
-                    size=18,
-                    weight=700,
-                    color="#682471"
+                ft.Container(
+                    content=ft.Row(
+                        controls=[
+                            ft.Text(
+                                prod["nombre_producto"],
+                                size=18,
+                                weight=700,
+                                color="#682471"
+                            ),
+                            cantidad_label,
+                        ],
+                        spacing=56,
+                        alignment=ft.MainAxisAlignment.START
+                    ),
+                    padding=ft.padding.only(left=128)
                 ),
-                cantidad_label,
-                ajuste_input,
-                btn_guardar
+                ft.Container(
+                    content=ft.Row(
+                        controls=[
+                            ajuste_input,
+                            btn_guardar
+                        ],
+                        spacing=20,
+                        alignment=ft.MainAxisAlignment.END
+                    ),
+                    padding=ft.padding.only(right=128)
+                ),
             ],
             spacing=9,
-            alignment=ft.MainAxisAlignment.SPACE_AROUND
+            alignment=ft.MainAxisAlignment.SPACE_BETWEEN
         )
 
     def construir_paneles(filtrar_texto=None):
@@ -193,6 +211,7 @@ def crear_vista_inventario(page: ft.Page) -> ft.View:
             )
         ),
         padding=ft.padding.only(right=16),
+        margin=ft.margin.only(top=4)
     )
 
     # Barra de búsqueda
@@ -230,7 +249,8 @@ def crear_vista_inventario(page: ft.Page) -> ft.View:
                 btn_recargar
             ],
             alignment=ft.MainAxisAlignment.SPACE_BETWEEN
-        )
+        ),
+        margin=ft.margin.only(top=16)
     )
 
     # Columna principal

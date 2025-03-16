@@ -7,105 +7,12 @@ LIGHT_PURPLE = "#9B5AA3"
 PURPLE = "#682471"
 DARK_BLUE = "#1E0039"
 
+
 def crear_vista_analisis(page: ft.Page):
-    option_view = ft.Container(
-        col = 1,
-        bgcolor=DARK_PURPLE_2,
-        
-        content=ft.Column(
-            controls=[
-                ft.Container(
-                    content=ft.ElevatedButton(
-                        content=ft.Text(
-                            "Horarios Críticos",
-                            color=ft.Colors.WHITE,
-                            size=14,
-                            text_align=ft.TextAlign.CENTER,
-                            rotate=ft.Rotate(angle=-1.57),
-                        ),
-                        bgcolor=DARK_PURPLE_2,
-                        style=ft.ButtonStyle(
-                            overlay_color=ft.Colors.with_opacity(0.5, LIGHT_PURPLE),
-                        ),
-                        elevation=0,
-                        
-                    ),
-                    padding=10,
-                    bgcolor=DARK_PURPLE_2,
-                    
-                ),
-                ft.Container(
-                    content=ft.ElevatedButton(
-                        content=ft.Text(
-                            "Desempeño Financiero",
-                            color=ft.Colors.WHITE,
-                            size=14,
-                            text_align=ft.TextAlign.CENTER,
-                            rotate=ft.Rotate(angle=-1.57),
-                        ),
-                        bgcolor=DARK_PURPLE_2,
-                        style=ft.ButtonStyle(
-                            overlay_color=ft.Colors.with_opacity(0.5, LIGHT_PURPLE),
-                        ),
-                        elevation=0,
-                     
-                    ),
-                    padding=10,
-                    bgcolor=DARK_PURPLE_2,
-                
-                ),
-                ft.Container(
-                    content=ft.ElevatedButton(
-                        content=ft.Text(
-                            "Ventas/Día",
-                            color=ft.Colors.WHITE,
-                            size=14,
-                            text_align=ft.TextAlign.CENTER,
-                            rotate=ft.Rotate(angle=-1.57),
-                        ),
-                        bgcolor=DARK_PURPLE_2,
-                        style=ft.ButtonStyle(
-                            overlay_color=ft.Colors.with_opacity(0.5, LIGHT_PURPLE),
-                        ),
-                        elevation=0,
-                       
-                    ),
-                    padding=10,
-                    bgcolor=DARK_PURPLE_2,
-                    
-                ),
-                ft.Container(
-                    content=ft.ElevatedButton(
-                        content=ft.Text(
-                            "Ventas/Hora",
-                            color=ft.Colors.WHITE,
-                            size=14,
-                            text_align=ft.TextAlign.CENTER,
-                            rotate=ft.Rotate(angle=-1.57),
-                        ),
-                        bgcolor=DARK_PURPLE_2,
-                        style=ft.ButtonStyle(
-                            overlay_color=ft.Colors.with_opacity(0.5, LIGHT_PURPLE),
-                        ),
-                        elevation=0,
-                       
-                    ),
-                    padding=10,
-                    bgcolor=DARK_PURPLE_2,
-                  
-                ),
-            ],
-            alignment=ft.MainAxisAlignment.CENTER,
-            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-            spacing=30,
-        ),
-        padding=5,
-        border_radius=ft.border_radius.only(top_right=10, bottom_right=10),
-    )
 
     graph_view = ft.Container(
-        col = 6,
-        bgcolor=LIGHT_PURPLE,
+        col=6,
+        bgcolor=PURPLE,
         border_radius=10,
         content=ft.Text(
             "(Gráfico aquí)",
@@ -119,8 +26,60 @@ def crear_vista_analisis(page: ft.Page):
         alignment=ft.alignment.center
     )
 
+
+    def change_graph(text):
+       
+        graph_view.content = ft.Text(
+            text,
+            color=ft.Colors.WHITE,
+            size=24,
+            text_align=ft.TextAlign.CENTER,
+        )
+        page.update()  
+
+   
+    button_hourly_sales = ft.ElevatedButton(
+        text="Ventas/Hora",
+        bgcolor=DARK_PURPLE_2,
+        color="#FFFFFF",
+        on_click=lambda e: change_graph( "Ventas/Hora")  
+    )
+
+    button_daily_sales = ft.ElevatedButton(
+        text="Ventas/Día",
+        bgcolor=DARK_PURPLE_2,
+        color="#FFFFFF",
+        on_click=lambda e: change_graph( "Ventas/Día") 
+    )
+
+    button_financial_performance = ft.ElevatedButton(
+        text="Desempeño Financiero",
+        bgcolor=DARK_PURPLE_2,
+        color="#FFFFFF",
+        on_click=lambda e: change_graph( "Desempeño Financiero")  
+    )
+
+    button_critical_hours = ft.ElevatedButton(
+        text="Horarios Críticos",
+        bgcolor=DARK_PURPLE_2,
+        color="#FFFFFF",
+        on_click=lambda e: change_graph( "Horarios Críticos")  
+    )
+
+
+    button_container = ft.Row(
+        controls=[
+            button_hourly_sales,
+            button_daily_sales,
+            button_financial_performance,
+            button_critical_hours
+        ],
+        alignment=ft.MainAxisAlignment.CENTER,
+        spacing=20
+    )
+
     data_view = ft.Container(
-        col = 5,
+        col=5,
         bgcolor=DARK_BLUE,
         border_radius=10,
         content=ft.Text(
@@ -140,13 +99,13 @@ def crear_vista_analisis(page: ft.Page):
         bgcolor=ft.Colors.WHITE,
         appbar=crear_appbar(page, current_route="/analysis"),
         controls=[
+            button_container,  
             ft.ResponsiveRow(
                 controls=[
-                    option_view,
                     graph_view,
                     data_view
                 ],
-                alignment=ft.MainAxisAlignment.CENTER,
+                alignment=ft.alignment.center,
                 spacing=30
             )
         ],

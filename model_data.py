@@ -144,3 +144,146 @@ class DataModel:
             }
         )
         print(f"[DEBUG] Inventario '{producto['nombre_producto']}' actualizado a {nueva_cantidad}.")
+
+ # -------------------------------
+    # Nuevas funciones para análisis
+    # -------------------------------
+    def ventas_por_hora(self, fecha):
+        pipeline = [
+            {"$match": {"fecha": fecha}},
+            {"$unwind": "$productos"},
+            {"$project": {
+                "hour": {"$substrCP": ["$hora", 0, 2]},
+                "cantidad": "$productos.cantidad",
+                "nombre_producto": "$productos.nombre_producto"
+            }},
+            {"$group": {
+                "_id": {"hour": "$hour", "nombre_producto": "$nombre_producto"},
+                "total": {"$sum": "$cantidad"}
+            }},
+            {"$sort": {"_id.hour": 1, "total": -1}},
+            {"$group": {
+                "_id": "$_id.hour",
+                "top_product": {"$first": "$_id.nombre_producto"},
+                "total": {"$first": "$total"}
+            }},
+            {"$sort": {"_id": 1}}
+        ]
+        results = self.coleccion_facturas.aggregate(pipeline)
+        data = []
+        for r in results:
+            hour_str = r["_id"]
+            top_product = r["top_product"]
+            total = r["total"]
+            data.append((hour_str, top_product, total))
+        return data
+
+    def ventas_productos_por_dia(self, fecha):
+        pipeline = [
+            {"$match": {"fecha": fecha}},
+            {"$unwind": "$productos"},
+            {"$group": {
+                "_id": "$productos.nombre_producto",
+                "total": {"$sum": "$productos.cantidad"}
+            }},
+            {"$sort": {"total": -1}}
+        ]
+        results = self.coleccion_facturas.aggregate(pipeline)
+        data = []
+        for r in results:
+            product = r["_id"]
+            total = r["total"]
+            data.append((product, total))
+        return data
+
+    def ventas_por_dia(self):
+        pipeline = [
+            {"$unwind": "$productos"},
+            {"$group": {
+                "_id": {"$dateToString": {"format": "%Y-%m-%d", "date": "$fecha"}},
+                "total": {"$sum": "$productos.subtotal"}
+            }},
+            {"$sort": {"_id": 1}}
+        ]
+        results = self.coleccion_facturas.aggregate(pipeline)
+        data = []
+        for r in results:
+            dia_str = r["_id"]
+            total = r["total"]
+            data.append((dia_str, total))
+        return data
+
+    def desempeno_financiero(self):
+        pipeline = [
+            {"$unwind": "$productos"},
+            {"$group": {
+                "_id": {"$dateToString": {"format": "%Y-%m", "date": "$fecha"}},
+                "total": {"$sum": "$productos.subtotal"}
+            }},
+            {"$sort": {"_id": 1}}
+        ]
+        results = self.coleccion_facturas.aggregate(pipeline)
+        data = []
+        for r in results:
+            mes_str = r["_id"]
+            total = r["total"]
+            data.append((mes_str, total))
+        return data
+
+    def desempeno_financiero_diario(self):
+        pipeline = [
+            {"$unwind": "$productos"},
+            {"$group": {
+                "_id": {"$dateToString": {"format": "%Y-%m-%d", "date": "$fecha"}},
+                "total": {"$sum": "$productos.subtotal"}
+            }},
+            {"$sort": {"_id": 1}}
+        ]
+        results = self.coleccion_facturas.aggregate(pipeline)
+        data = []
+        for r in results:
+            day_str = r["_id"]
+            total = r["total"]
+            data.append((day_str, total))
+        return data
+
+    def horarios_criticos(self):
+        pipeline = [
+            {"$unwind": "$productos"},
+            {"$project": {
+                "dow": {"$dayOfWeek": "$fecha"},
+                "hour": {"$substrCP": ["$hora", 0, 2]},
+                "subtotal": "$productos.subtotal"
+            }},
+            {"$group": {
+                "_id": {"dow": "$dow", "hour": "$hour"},
+                "total": {"$sum": "$subtotal"}
+            }},
+            {"$sort": {"_id.dow": 1, "_id.hour": 1}}
+        ]
+        results = self.coleccion_facturas.aggregate(pipeline)
+        dow_map = {1:"Dom", 2:"Lun", 3:"Mar", 4:"Mié", 5:"Jue", 6:"Vie", 7:"Sáb"}
+        data_map = {}
+        all_hours = set()
+        all_days = set()
+        for r in results:
+            dow_num = r["_id"]["dow"]
+            hour_str = r["_id"]["hour"]
+            total = r["total"]
+            day_str = dow_map.get(dow_num, f"D{dow_num}")
+            if day_str not in data_map:
+                data_map[day_str] = {}
+            data_map[day_str][hour_str] = total
+            all_days.add(day_str)
+            all_hours.add(hour_str)
+        sorted_days = ["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"]
+        sorted_days = [d for d in sorted_days if d in all_days]
+        sorted_hours = sorted(list(all_hours), key=lambda x: int(x))
+        z = []
+        for d in sorted_days:
+            row = []
+            for h in sorted_hours:
+                val = data_map.get(d, {}).get(h, 0)
+                row.append(val)
+            z.append(row)
+        return (sorted_hours, sorted_days, z)

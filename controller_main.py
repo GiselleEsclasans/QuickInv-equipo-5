@@ -109,6 +109,7 @@ def main_step_5(page: ft.Page):
     page.padding = 0 # ✅ Sin relleno
     page.margin = 0 # ✅ Sin margen
     page.on_route_change = route_change_step_5 # ✅ Manejar cambios de ruta
+    page.window.maximized = True
 
     page.file_picker = ft.FilePicker(
         on_result=lambda result: on_file_picked_step_5(result.files, page)

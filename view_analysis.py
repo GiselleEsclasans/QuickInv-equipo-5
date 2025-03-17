@@ -56,7 +56,7 @@ def crear_grafico_ventas_hora(fecha_str):
         if len(sorted_prods) > 3:
             top_list.append(f"+{len(sorted_prods)-3} more")
         top_label = ", ".join(top_list)
-        final_data.append((hour, top_label, sum_total))
+        final_data.append((hour, top_label, sum_total, sorted_prods))
     fig, ax = plt.subplots(figsize=(8,6))
     if not final_data:
         ax.text(0.5, 0.5, "No hay datos para la fecha seleccionada", 
@@ -68,7 +68,22 @@ def crear_grafico_ventas_hora(fecha_str):
         hours = [fd[0] for fd in final_data]
         labels = [fd[1] for fd in final_data]
         totals = [fd[2] for fd in final_data]
-        bars = ax.bar(hours, totals, color="indigo")
+        sorted_prods_list = [fd[3] for fd in final_data]
+       
+        colors = []
+        group_colors = ["#197676", "#390865", "#682471"] 
+        group_size = max(1, len(sorted_prods_list) // 3) 
+
+        for i, prods in enumerate(sorted_prods_list):
+            if i == 0:
+                colors.append("#BF0603")  
+            elif i == 1 or i == 2:
+                colors.append("#FF8591") 
+            else:
+                group_index = (i - 3) // group_size 
+                colors.append(group_colors[group_index % len(group_colors)]) 
+
+        bars = ax.bar(hours, totals, color=colors)
         ax.set_title(f"Ventas por Hora - {fecha_str}")
         ax.set_xlabel("Hora")
         ax.set_ylabel("Cantidad Vendida")
@@ -81,6 +96,7 @@ def crear_grafico_ventas_hora(fecha_str):
                         textcoords="offset points",
                         ha="center", va="bottom", rotation=90, fontsize=8)
     return fig_to_base64(fig)
+
 
 # ===================== VENTAS/DÍA =====================
 def crear_grafico_ventas_dia(fecha_str):
@@ -102,8 +118,23 @@ def crear_grafico_ventas_dia(fecha_str):
         sizes = [d[1] for d in data]
         total_dia = sum(sizes)
 
-        # Generamos el pastel
-        ax.pie(sizes, labels=labels, autopct="%1.1f%%", startangle=90)
+        colors = []
+        sorted_data = sorted(data, key=lambda x: x[1], reverse=True)
+        for i, item in enumerate(sorted_data):
+            if i == 0: 
+                colors.append("#BF0603")
+            elif i == 1 or i == 2: 
+                colors.append("#FF8591")
+            else:  
+                if (i - 3) % 3 == 0:  
+                    colors.append("#197676")
+                elif (i - 3) % 3 == 1:  
+                    colors.append("#390865")
+                else:  
+                    colors.append("#682471")
+
+      
+        ax.pie(sizes, labels=labels, autopct="%1.1f%%", startangle=90, colors=colors)
         ax.axis("equal")
         ax.set_title(f"Ventas por Día - {fecha_str}")
 
@@ -117,7 +148,6 @@ def crear_grafico_ventas_dia(fecha_str):
         )
 
     return fig_to_base64(fig)
-
 
 # ===================== DESEMPEÑO FINANCIERO =====================
 def crear_grafico_desempeno_financiero(granularity="mes"):
@@ -140,8 +170,8 @@ def crear_grafico_desempeno_financiero(granularity="mes"):
         x = [d[0] for d in data]
         y = [d[1] for d in data]
         total_fin = sum(y)
-        ax.plot(x, y, marker="o", color="green")
-        ax.fill_between(x, y, color="green", alpha=0.3)
+        ax.plot(x, y, marker="o", color="#BF0603")  
+        ax.fill_between(x, y, color="#FF8591", alpha=0.3) 
         ax.set_title(title)
         ax.set_xlabel(xlabel)
         ax.set_ylabel("Total Ventas")
@@ -158,7 +188,12 @@ def crear_grafico_horarios_criticos():
                 horizontalalignment="center", verticalalignment="center", transform=ax.transAxes)
         ax.set_title("Tiempos Críticos para Ventas")
     else:
-        cax = ax.imshow(z_matrix, cmap="OrRd", aspect="auto")
+     
+        from matplotlib.colors import LinearSegmentedColormap
+        colors = ["#197676", "#390865"]
+        cmap = LinearSegmentedColormap.from_list("custom_cmap", colors)
+
+        cax = ax.imshow(z_matrix, cmap=cmap, aspect="auto")
         ax.set_xticks(range(len(sorted_hours)))
         ax.set_xticklabels(sorted_hours, rotation=90)
         ax.set_yticks(range(len(sorted_days)))
@@ -262,22 +297,36 @@ def crear_vista_analisis(page: ft.Page):
         on_click=lambda e: change_graph("Horarios Críticos")
     )
     
+
     button_container = ft.Row(
         controls=[button_hourly, button_daily, button_financial, button_critical],
         alignment=ft.MainAxisAlignment.CENTER,
         spacing=20
     )
     
-    top_controls = ft.Row(
+    filter_container = ft.Row(
         controls=[fecha_dropdown, granularidad_dropdown],
         alignment=ft.MainAxisAlignment.CENTER,
         spacing=20
     )
     
+    top_container = ft.Row(
+        controls=[button_container, filter_container],
+        alignment=ft.MainAxisAlignment.CENTER,
+        spacing=40 
+    )
+    
     layout = ft.Column(
-        controls=[top_controls, button_container, graph_container],
+        controls=[top_container, graph_container],  
         alignment=ft.MainAxisAlignment.START,
         spacing=20,
+        expand=True
+    )
+    
+ 
+    layout_with_margin = ft.Container(
+        content=layout,
+        margin=ft.margin.only(top=20),  
         expand=True
     )
     
@@ -285,7 +334,7 @@ def crear_vista_analisis(page: ft.Page):
         route="/analysis",
         bgcolor=ft.Colors.WHITE,
         appbar=crear_appbar(page, current_route="/analysis"),
-        controls=[layout]
+        controls=[layout_with_margin]  
     )
 
 if __name__ == "__main__":

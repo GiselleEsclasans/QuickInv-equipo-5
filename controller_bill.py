@@ -36,7 +36,7 @@ def validar_fila(fila, index, archivo):
     return True, producto
 
 
-def procesar_facturas(archivos):
+def procesar_facturas(archivos, errors):
     """✅ Procesa archivos de facturas en `.xlsx` y descuenta stock después de la inserción en MongoDB."""
     facturas_procesadas = {}
 
@@ -63,6 +63,11 @@ def procesar_facturas(archivos):
                 producto = data_model.obtener_producto(categoria, id_producto)
                 if not producto:
                     print(f"[ERROR] Producto '{id_producto}' no encontrado en inventario. Factura {numero_factura} no se procesará.")
+                    errors.append({
+                        "Archivo": archivo,
+                        "Tipo_Error": "Producto_Inexistente",
+                        "Producto": id_producto
+                    })
                     continue  # No procesa la factura si el producto no existe
                 
                 # ✅ Verificar que haya stock suficiente
@@ -70,6 +75,13 @@ def procesar_facturas(archivos):
                     print(f"Stock insuficiente para el producto {producto['nombre_producto']} (ID: {id_producto}).")
                     print(f"   Stock disponible: {producto['cantidad_disponible']}, cantidad requerida: {cantidad_vendida}.")
                     print(f"    Factura {numero_factura} no se procesará debido a falta de stock.")
+                    errors.append({
+                        "Archivo": archivo,
+                        "Tipo_Error": "Stock_Insuficiente",
+                        "Producto": id_producto,
+                        "Cantidad_Solicitada": cantidad_vendida,
+                        "Cantidad_Disponible": producto["cantidad_disponible"]
+                    })
                     continue  # ❌ No procesa la factura si no hay suficiente stock
                 
                 # ✅ Verificar que el precio unitario coincida con el del inventario
@@ -78,6 +90,13 @@ def procesar_facturas(archivos):
                     print(f" Precio incorrecto en Factura {numero_factura} para el producto {producto['nombre_producto']} (ID: {id_producto}).")
                     print(f"   Precio en inventario: {precio_inventario}, precio en factura: {precio_factura}.")
                     print(f"    Factura {numero_factura} no se procesará debido a discrepancia de precio.")
+                    errors.append({
+                        "Archivo": archivo,
+                        "Tipo_Error": "Precio_Incoherente",
+                        "Producto": id_producto,
+                        "Precio_Indicado": precio_factura,
+                        "Precio_Real": precio_inventario
+                    })
                     continue  # ❌ No procesa la factura si el precio no coincide
 
                 # ✅ Validar la fila antes de procesarla
@@ -122,4 +141,4 @@ def procesar_facturas(archivos):
             for producto in factura["productos"]:
                 data_model.descontar_stock(producto["id_producto"],producto["categoria"], producto["cantidad"], factura["fecha"])
 
-        print(f"\n {len(facturas_procesadas)} facturas insertadas correctamente en MongoDB Atlas.")
+        print(f"\n {len(facturas_procesadas)} facturas insertadas correctamente en el sistema.")

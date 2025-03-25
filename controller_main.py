@@ -157,17 +157,31 @@ def on_file_picked_step_5(files, page: ft.Page):
     file_path = files[0].path
     print(f"[DEBUG] Procesando archivo: {file_path}")
 
+    errores = []
     try:
         # ✅ Procesar e insertar las facturas en MongoDB Atlas
-        procesar_facturas([file_path])
-        mensaje = f"Archivo '{files[0].name}' procesado correctamente.\nFacturas insertadas en MongoDB Atlas."
+        procesar_facturas([file_path], errores)
 
         def closeSuccess(e):
             page.close(dlgSuccess)
 
+        if len(errores) == 0:
+            contenido = ft.Text(f"Archivo '{files[0].name}' procesado correctamente.\nFacturas insertadas en el sistema.", color="#000000")
+        else:
+            erroresText = [
+                ft.Text(f"Archivo '{files[0].name}' procesado parcialmente.\nFacturas insertadas en el sistema.", color="#000000"),
+                ft.Text("Errores:", color="#000000", weight=ft.FontWeight.W_600, size=16)
+            ]
+
+            for error in errores:
+                erroresText.append(ft.Text(f"Producto {error["Producto"]} - {error["Tipo_Error"]}", color="#000000"))
+
+            contenido = ft.Column(erroresText)
+
         dlgSuccess = ft.AlertDialog(
-            title=ft.Text("Procesamiento exitoso", color="#000000"),
-            content=ft.Text(mensaje, color="#000000"),
+            title=ft.Text("Procesamiento exitoso", color="#000000", weight=ft.FontWeight.W_800),
+            # content=ft.Text(mensaje, color="#000000"),
+            content=contenido,
             actions=[
                 ft.TextButton(
                     "Cerrar",
@@ -184,7 +198,14 @@ def on_file_picked_step_5(files, page: ft.Page):
         page.open(dlgSuccess)
 
     except Exception as ex:
-        print(f"[DEBUG] Error al procesar archivo: {ex}")
+        print(f"[DEBUG] Error al procesar archivo: {type(ex).__name__} - {ex}")
+
+        error = "Error"
+        match type(ex).__name__:
+            case "UnboundLocalError":
+                error = "El formato de columnas es incorrecto"
+            case _:
+                error = "Hubo un error. Inténtelo más tarde"
 
         def closeError(e):
             page.close(dlgError)
@@ -192,7 +213,7 @@ def on_file_picked_step_5(files, page: ft.Page):
         dlgError = ft.AlertDialog(
             title=ft.Text("Error al procesar archivo", color="#000000"),
             # content=ft.Text(str(ex), color="#000000")
-            content=ft.Text("El formato del archivo es incorrecto", color="#000000"),
+            content=ft.Text(error, color="#000000"),
             actions=[
                 ft.TextButton(
                     "Cerrar",

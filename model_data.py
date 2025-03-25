@@ -320,3 +320,67 @@ class DataModel:
                 row.append(val)
             z.append(row)
         return (sorted_hours, sorted_days, z)
+    
+    def horarios_criticos2(self, mes=None):
+        try:
+            if mes is None:
+                mes = datetime.now().month
+
+            pipeline = [
+                {"$unwind": "$productos"},
+                {
+                    "$project": {
+                        "dow": {"$dayOfWeek": "$fecha"},
+                        "hour": {"$substrCP": ["$hora", 0, 2]},
+                        "subtotal": "$productos.subtotal",
+                        "month": {"$month": "$fecha"} 
+                    }
+                },
+                {
+                    "$match": {
+                        "month": mes  
+                    }
+                },
+                {
+                    "$group": {
+                        "_id": {"dow": "$dow", "hour": "$hour"},
+                        "total": {"$sum": "$subtotal"}
+                    }
+                },
+                {"$sort": {"_id.dow": 1, "_id.hour": 1}}
+            ]
+
+            results = self.coleccion_facturas.aggregate(pipeline)
+            dow_map = {1: "Dom", 2: "Lun", 3: "Mar", 4: "Mié", 5: "Jue", 6: "Vie", 7: "Sáb"}
+            data_map = {}
+            all_hours = set()
+            all_days = set()
+
+            for r in results:
+                dow_num = r["_id"]["dow"]
+                hour_str = r["_id"]["hour"]
+                total = r["total"]
+                day_str = dow_map.get(dow_num, f"D{dow_num}")
+
+                if day_str not in data_map:
+                    data_map[day_str] = {}
+                data_map[day_str][hour_str] = total
+                all_days.add(day_str)
+                all_hours.add(hour_str)
+
+            sorted_days = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"]
+            sorted_days = [d for d in sorted_days if d in all_days]
+            sorted_hours = sorted(list(all_hours), key=lambda x: int(x))
+            z = []
+
+            for d in sorted_days:
+                row = []
+                for h in sorted_hours:
+                    val = data_map.get(d, {}).get(h, 0)
+                    row.append(val)
+                z.append(row)
+
+            return (sorted_hours, sorted_days, z)
+        except Exception as e:
+            print(f"[ERROR] Al obtener horarios críticos: {e}")
+            return [], [], []  

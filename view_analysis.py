@@ -7,8 +7,8 @@ import base64
 from datetime import datetime
 from view_main import crear_appbar
 from model_data import DataModel
+import random
 
-# Colores y constantes
 DARK_PURPLE = "#4A1976"
 DARK_PURPLE_2 = "#390865"
 PURPLE = "#682471"
@@ -16,6 +16,22 @@ DARK_BLUE = "#1E0039"
 
 data_model = DataModel()
 analysis_state = {"current": "Ventas/Hora"}
+
+def generar_color_aleatorio():
+    """Genera un color aleatorio en formato hexadecimal que no sea ni muy oscuro ni muy claro."""
+    while True:
+        # Generar un color aleatorio
+        r = random.randint(100, 200)  # Rango de rojo
+        g = random.randint(100, 200)  # Rango de verde
+        b = random.randint(100, 200)  # Rango de azul
+        color = "#{:02X}{:02X}{:02X}".format(r, g, b)
+        
+        # Comprobar si el color es adecuado (no muy claro ni muy oscuro)
+        if not (r < 100 and g < 100 and b < 100):  # No muy oscuro
+            if not (r > 200 and g > 200 and b > 200):  # No muy claro
+                return color
+
+
 
 def fig_to_base64(fig):
     buf = io.BytesIO()
@@ -33,8 +49,10 @@ def crear_grafico_ventas_hora(fecha_str):
     except Exception:
         fecha_dt = datetime.now()
         fecha_str = fecha_dt.strftime("%Y-%m-%d")
+    
     raw_data = data_model.raw_ventas_por_hora(fecha_dt)
     data_map = {}
+    
     for item in raw_data:
         hour = item["hour"]
         prod = item["producto"]
@@ -42,6 +60,7 @@ def crear_grafico_ventas_hora(fecha_str):
         if hour not in data_map:
             data_map[hour] = {}
         data_map[hour][prod] = data_map[hour].get(prod, 0) + qty
+    
     final_data = []
     for hour in sorted(data_map.keys(), key=lambda h: int(h)):
         product_dict = data_map[hour]
@@ -57,7 +76,9 @@ def crear_grafico_ventas_hora(fecha_str):
             top_list.append(f"+{len(sorted_prods)-3} more")
         top_label = ", ".join(top_list)
         final_data.append((hour, top_label, sum_total, sorted_prods))
-    fig, ax = plt.subplots(figsize=(8,6))
+    
+    fig, ax = plt.subplots(figsize=(8, 6))
+    
     if not final_data:
         ax.text(0.5, 0.5, "No hay datos para la fecha seleccionada", 
                 horizontalalignment="center", verticalalignment="center", transform=ax.transAxes)
@@ -68,26 +89,48 @@ def crear_grafico_ventas_hora(fecha_str):
         hours = [fd[0] for fd in final_data]
         labels = [fd[1] for fd in final_data]
         totals = [fd[2] for fd in final_data]
-        sorted_prods_list = [fd[3] for fd in final_data]
-       
+        
+        group_colors = [
+            "#FF8591",
+            "#C08089",
+            "#A17E85",
+            "#8C7D83",
+            "#51797C",
+            "#197676",
+            "#1E6273",
+            "#225570",
+            "#28416D",
+            "#2D2D6A",
+            "#321D68",
+            "#390865",
+            "#3F0B66",
+            "#450F68",
+            "#3B0B5B",
+            "#4F156A",
+            "#5C1D6E",
+            "#682471",
+            "#712E7A",
+            "#8E3899",
+            "#9B3CA8",
+            "#AC4FB9",
+            "#B668C2"
+        ]
+        
+        max_index = totals.index(max(totals))
+        
         colors = []
-        group_colors = ["#197676", "#390865", "#682471"] 
-        group_size = max(1, len(sorted_prods_list) // 3) 
-
-        for i, prods in enumerate(sorted_prods_list):
-            if i == 0:
+        for i in range(len(totals)):
+            if i == max_index:
                 colors.append("#BF0603")  
-            elif i == 1 or i == 2:
-                colors.append("#FF8591") 
             else:
-                group_index = (i - 3) // group_size 
-                colors.append(group_colors[group_index % len(group_colors)]) 
+                colors.append(group_colors[i % len(group_colors)])  
 
         bars = ax.bar(hours, totals, color=colors)
         ax.set_title(f"Ventas por Hora - {fecha_str}")
         ax.set_xlabel("Hora")
         ax.set_ylabel("Cantidad Vendida")
         plt.xticks(rotation=90)
+        
         for bar, lab in zip(bars, labels):
             height = bar.get_height()
             ax.annotate(lab,
@@ -95,11 +138,21 @@ def crear_grafico_ventas_hora(fecha_str):
                         xytext=(0, 3),
                         textcoords="offset points",
                         ha="center", va="bottom", rotation=90, fontsize=8)
+    
     return fig_to_base64(fig)
-
 
 # ===================== VENTAS/DÍA =====================
 def crear_grafico_ventas_dia(fecha_str):
+
+    paleta_colores = [
+        "#FF8591", "#C08089", "#A17E85", "#8C7D83",
+        "#51797C", "#197676", "#1E6273", "#225570",
+        "#28416D", "#2D2D6A", "#321D68", "#390865",
+        "#3F0B66", "#450F68", "#3B0B5B", "#4F156A",
+        "#5C1D6E", "#682471", "#712E7A", "#8E3899",
+        "#9B3CA8", "#AC4FB9", "#B668C2"
+    ]
+    
     try:
         fecha_dt = datetime.strptime(fecha_str, "%Y-%m-%d")
     except Exception:
@@ -119,32 +172,23 @@ def crear_grafico_ventas_dia(fecha_str):
         total_dia = sum(sizes)
 
         colors = []
-        sorted_data = sorted(data, key=lambda x: x[1], reverse=True)
-        for i, item in enumerate(sorted_data):
-            if i == 0: 
-                colors.append("#BF0603")
-            elif i == 1 or i == 2: 
-                colors.append("#FF8591")
-            else:  
-                if (i - 3) % 3 == 0:  
-                    colors.append("#197676")
-                elif (i - 3) % 3 == 1:  
-                    colors.append("#390865")
-                else:  
-                    colors.append("#682471")
+        for i in range(len(data)):
+            if i < len(paleta_colores):
+                colors.append(paleta_colores[i])
+            else:
+                colors.append(generar_color_aleatorio())
 
-      
         ax.pie(sizes, labels=labels, autopct="%1.1f%%", startangle=90, colors=colors)
         ax.axis("equal")
         ax.set_title(f"Ventas por Día - {fecha_str}")
 
-        # Texto con el total del día, en la esquina superior derecha
+
         fig.text(
-            0.95, 0.9,                 # coordenadas x=0.95, y=0.9 (parte superior derecha)
+            0.95, 0.9,
             f"Total del día: {total_dia}",
             ha="right", va="top",
             fontsize=12, color="blue",
-            bbox=dict(facecolor='white', alpha=0.5, edgecolor='none')  # fondo semitransparente
+            bbox=dict(facecolor='white', alpha=0.5, edgecolor='none')
         )
 
     return fig_to_base64(fig)
@@ -180,17 +224,17 @@ def crear_grafico_desempeno_financiero(granularity="mes"):
     return fig_to_base64(fig)
 
 # ===================== HORARIOS CRÍTICOS =====================
-def crear_grafico_horarios_criticos():
-    sorted_hours, sorted_days, z_matrix = data_model.horarios_criticos()
-    fig, ax = plt.subplots(figsize=(8,6))
+def crear_grafico_horarios_criticos(mes):
+    sorted_hours, sorted_days, z_matrix = data_model.horarios_criticos2(mes)  
+    fig, ax = plt.subplots(figsize=(8, 6))
+    
     if not sorted_hours or not sorted_days:
         ax.text(0.5, 0.5, "No hay datos para horarios críticos", 
                 horizontalalignment="center", verticalalignment="center", transform=ax.transAxes)
         ax.set_title("Tiempos Críticos para Ventas")
     else:
-     
         from matplotlib.colors import LinearSegmentedColormap
-        colors = ["#197676", "#390865"]
+        colors = ["#FADEDE", "#BF0603"]
         cmap = LinearSegmentedColormap.from_list("custom_cmap", colors)
 
         cax = ax.imshow(z_matrix, cmap=cmap, aspect="auto")
@@ -199,11 +243,14 @@ def crear_grafico_horarios_criticos():
         ax.set_yticks(range(len(sorted_days)))
         ax.set_yticklabels(sorted_days)
         ax.set_title("Tiempos Críticos para Ventas")
+        
         for i in range(len(sorted_days)):
             for j in range(len(sorted_hours)):
                 val = z_matrix[i][j]
                 ax.text(j, i, f"{val:.0f}", ha="center", va="center", color="black", fontsize=8)
+        
         fig.colorbar(cax, ax=ax)
+    
     return fig_to_base64(fig)
 
 # ===================== FILTRO DE FECHAS PARA ANALISIS =====================
@@ -226,15 +273,16 @@ def crear_vista_analisis(page: ft.Page):
         fecha_inicial = fechas[0].strftime("%Y-%m-%d")
     else:
         fecha_inicial = datetime.now().strftime("%Y-%m-%d")
-    
-    # Gráfico inicial: Ventas por Hora con la fecha más reciente
+
     img_base64 = crear_grafico_ventas_hora(fecha_inicial)
     image_control = ft.Image(src_base64=img_base64, width=800, height=600)
-    # Envolver el gráfico en un contenedor centrado
     graph_container = ft.Container(content=image_control, alignment=ft.alignment.center)
     
     fecha_dropdown = ft.Dropdown(options=[], value=None, width=250)
     cargar_fechas_dropdown(fecha_dropdown, page)
+    
+    
+    
     
     granularidad_dropdown = ft.Dropdown(
         options=[ft.dropdown.Option("Mensual"), ft.dropdown.Option("Diario")],
@@ -242,30 +290,49 @@ def crear_vista_analisis(page: ft.Page):
         visible=False
     )
     
+    mes_dropdown = ft.Dropdown(
+        options=[ft.dropdown.Option(str(i)) for i in range(1, 13)],
+        value="1",  
+        visible=False
+    )
+    
     fecha_dropdown.on_change = lambda e: change_graph(analysis_state["current"])
     granularidad_dropdown.on_change = lambda e: change_graph("Desempeño Financiero")
+    mes_dropdown.on_change = lambda e: update_horarios_criticos()
+    
+    def update_horarios_criticos():
+        mes = int(mes_dropdown.value)  
+        nuevo_img = crear_grafico_horarios_criticos(mes)  
+        image_control.src_base64 = nuevo_img
+        image_control.update()
+        page.update()
     
     def change_graph(analysis_type: str):
         analysis_state["current"] = analysis_type
         if analysis_type == "Ventas/Hora":
             fecha_dropdown.visible = True
             granularidad_dropdown.visible = False
+            mes_dropdown.visible = False
             fecha_str = fecha_dropdown.value or fecha_inicial
             nuevo_img = crear_grafico_ventas_hora(fecha_str)
         elif analysis_type == "Ventas/Día":
             fecha_dropdown.visible = True
             granularidad_dropdown.visible = False
+            mes_dropdown.visible = False
             fecha_str = fecha_dropdown.value or fecha_inicial
             nuevo_img = crear_grafico_ventas_dia(fecha_str)
         elif analysis_type == "Desempeño Financiero":
             fecha_dropdown.visible = False
             granularidad_dropdown.visible = True
+            mes_dropdown.visible = False
             granularity = "mes" if (granularidad_dropdown.value or "Mensual").lower() == "mensual" else "dia"
             nuevo_img = crear_grafico_desempeno_financiero(granularity)
         elif analysis_type == "Horarios Críticos":
             fecha_dropdown.visible = False
             granularidad_dropdown.visible = False
-            nuevo_img = crear_grafico_horarios_criticos()
+            mes_dropdown.visible = True
+            mes = int(mes_dropdown.value) 
+            nuevo_img = crear_grafico_horarios_criticos(mes) 
         else:
             nuevo_img = ""
         image_control.src_base64 = nuevo_img
@@ -305,7 +372,7 @@ def crear_vista_analisis(page: ft.Page):
     )
     
     filter_container = ft.Row(
-        controls=[fecha_dropdown, granularidad_dropdown],
+        controls=[fecha_dropdown, granularidad_dropdown, mes_dropdown],
         alignment=ft.MainAxisAlignment.CENTER,
         spacing=20
     )
